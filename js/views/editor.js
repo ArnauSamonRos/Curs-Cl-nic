@@ -1,7 +1,7 @@
 // Editor genèric: pinta qualsevol plantilla (modes → seccions → camps) + previsualització en viu.
 import { h } from '../core/dom.js';
 import { renderField } from '../core/fields.js';
-import { copyText } from '../core/clipboard.js';
+import { copyRich } from '../core/clipboard.js';
 import { getDraft, resetDraft } from '../core/store.js';
 import { t, tr, getLang } from '../i18n/index.js';
 import { attachKeyNav, focusKey, restoreFocus, focusFirst } from '../core/keynav.js';
@@ -19,7 +19,7 @@ export function Editor(unitId, template) {
     return draft.data;
   };
 
-  let text = '';
+  let text = '', lines = [];
   const lang = getLang();
   const T = (ca, es) => (lang === 'es' ? es : ca);
 
@@ -33,8 +33,9 @@ export function Editor(unitId, template) {
     const G = (masc, fem, both) => (s.sex === 'h' ? masc : s.sex === 'd' ? fem : both);
     // Capçalera obligatòria a tots els HD: nom de la unitat a dalt de tot.
     text = `${t(`units.${unitId}`).toUpperCase()}\n\n${m.render(s, T, G).trim()}`;
-    preview.replaceChildren(...text.split('\n').map((line, i) => h('div', {
-      class: i === 0 ? 'pv-title' : HEADING.test(line) ? 'pv-heading' : line ? 'pv-line' : 'pv-gap' }, line)));
+    lines = text.split('\n').map((line, i) => ({ text: line, bold: i === 0 || HEADING.test(line) }));
+    preview.replaceChildren(...lines.map((l, i) => h('div', {
+      class: i === 0 ? 'pv-title' : l.bold ? 'pv-heading' : l.text ? 'pv-line' : 'pv-gap' }, l.text)));
   }
 
   function renderForm() {
@@ -56,7 +57,7 @@ export function Editor(unitId, template) {
   }
 
   copyBtn.addEventListener('click', async () => {
-    const ok = await copyText(text);
+    const ok = await copyRich(lines);
     copyBtn.textContent = ok ? t('editor.copied') : t('editor.copyError');
     copyBtn.classList.toggle('done', ok);
     setTimeout(() => { copyBtn.textContent = t('editor.copy'); copyBtn.classList.remove('done'); }, 1500);
