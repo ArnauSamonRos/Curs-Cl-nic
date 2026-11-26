@@ -3,4 +3,5 @@ import respiratori from './respiratori.js';
 import polivalent from './polivalent.js';
 import endocrino from './endocrino.js';
 import vacunes from './vacunes.js';
-export const TEMPLATES = { respiratori, 'polivalent-1': polivalent, 'polivalent-2': polivalent, endocrino, vacunacio: vacunes, infeccioses: vacunes };
+import geriatria from './geriatria.js';
+export const TEMPLATES = { respiratori, 'polivalent-1': polivalent, 'polivalent-2': polivalent, endocrino, vacunacio: vacunes, infeccioses: vacunes, geriatria };
