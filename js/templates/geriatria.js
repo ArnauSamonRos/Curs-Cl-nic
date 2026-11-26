@@ -9,7 +9,7 @@ const lbl = (x, T) => T(x.label.ca, x.label.es);
 const num = (v) => { const n = parseFloat(String(v).replace(',', '.')); return Number.isFinite(n) ? n : null; };
 
 // ---------- Interpretació d'escales ----------
-const barthel = (n) => (n >= 100 ? ['autònom', 'autónomo'] : n >= 91 ? ['dependència escassa', 'dependencia escasa']
+const barthel = (n, sex) => (n >= 100 ? (sex === 'd' ? ['autònoma', 'autónoma'] : sex === 'h' ? ['autònom', 'autónomo'] : ['autònom/a', 'autónomo/a']) : n >= 91 ? ['dependència escassa', 'dependencia escasa']
   : n >= 61 ? ['dependència moderada', 'dependencia moderada'] : n >= 21 ? ['dependència greu', 'dependencia grave'] : ['dependència total', 'dependencia total']);
 // Lawton i Brody: dones 0–8, homes 0–5.
 const lawton = (n, sex) => (sex === 'h'
@@ -19,6 +19,12 @@ const mna = (n) => (n >= 12 ? ['estat nutricional normal', 'estado nutricional n
 // Pfeiffer: nombre d'errors.
 const pfeiffer = (n) => (n <= 2 ? ['normal', 'normal'] : n <= 4 ? ['deteriorament cognitiu lleu', 'deterioro cognitivo leve']
   : n <= 7 ? ['deteriorament cognitiu moderat', 'deterioro cognitivo moderado'] : ['deteriorament cognitiu greu', 'deterioro cognitivo grave']);
+
+// Yesavage (GDS-15).
+const yesavage = (n) => (n <= 5 ? ['normal', 'normal'] : n <= 9 ? ['probable depressió', 'probable depresión'] : ['depressió establerta', 'depresión establecida']);
+// Minimental (MMSE, 0–30).
+const mmse = (n) => (n >= 24 ? ['normal', 'normal'] : n >= 19 ? ['deteriorament cognitiu lleu', 'deterioro cognitivo leve']
+  : n >= 14 ? ['deteriorament cognitiu moderat', 'deterioro cognitivo moderado'] : ['deteriorament cognitiu greu', 'deterioro cognitivo grave']);
 
 // ---------- Opcions ----------
 const SEX = [o('h', 'Home', 'Hombre'), o('d', 'Dona', 'Mujer')];
@@ -60,7 +66,7 @@ const valoracio = {
   label: L('Valoració', 'Valoración'),
   init: () => ({
     sex: null, reason: ['cog'], reasonExtra: '', company: null, companyOther: '',
-    weight: '', height: '', barthel: '', lawton: '', mna: '', pfeiffer: '', syndromes: [], synNote: '',
+    weight: '', height: '', barthel: '', lawton: '', mna: '', pfeiffer: '', mmse: '', yesavage: '', syndromes: [], synNote: '',
     lives: null, depend: null, support: [], socialNote: '', acts: [], actsOther: '',
     planType: 'pres', planWhen: '6', planOther: '',
   }),
@@ -86,6 +92,10 @@ const valoracio = {
       { type: 'note', id: 'mH', when: (s) => num(s.mna) != null, text: scoreHint('mna', mna, 14) },
       { type: 'number', id: 'pfeiffer', label: L('Pfeiffer (errors, 0–10)', 'Pfeiffer (errores, 0–10)') },
       { type: 'note', id: 'pH', when: (s) => num(s.pfeiffer) != null, text: scoreHint('pfeiffer', pfeiffer) },
+      { type: 'number', id: 'mmse', label: L('Minimental / MMSE (0–30)', 'Minimental / MMSE (0–30)') },
+      { type: 'note', id: 'mmH', when: (s) => num(s.mmse) != null, text: scoreHint('mmse', mmse, 30) },
+      { type: 'number', id: 'yesavage', label: L('Yesavage / GDS-15 (0–15)', 'Yesavage / GDS-15 (0–15)') },
+      { type: 'note', id: 'yH', when: (s) => num(s.yesavage) != null, text: scoreHint('yesavage', yesavage, 15) },
     ] },
     { title: L('Síndromes geriàtrics', 'Síndromes geriátricos'), fields: [
       { type: 'chips', id: 'syndromes', multi: true, wide: true, label: L('Cap marcat = no en presenta', 'Ninguno marcado = no presenta'), options: SYNDROMES },
@@ -107,8 +117,15 @@ const valoracio = {
   ],
   render(s, T, G) {
     const out = [];
+    const section = (title, lines) => { const l = lines.filter(Boolean); if (l.length) out.push('', title, ...l); };
+    const scale = (name, v, fn, max) => {
+      const n = num(v); if (n == null) return null;
+      const r = fn(n, s.sex);
+      return `${name}: ` + T(`${n}${max ? '/' + max : ''}, ${r[0]}.`, `${n}${max ? '/' + max : ''}, ${r[1]}.`);
+    };
+
     const reasons = [...s.reason.map((r) => T(...REASON_TXT[r])), s.reasonExtra].filter(Boolean);
-    out.push(T("Pacient acut a visita de Geriatria", 'Paciente acude a visita de Geriatría') + (reasons.length ? T(' per ', ' para ') + joinList(reasons, T) : '') + '.');
+    out.push(T('Pacient acut a visita de Geriatria', 'Paciente acude a visita de Geriatría') + (reasons.length ? T(' per ', ' para ') + joinList(reasons, T) : '') + '.');
     if (s.company === 'sol') out.push(T(`Ve ${G('sol', 'sola', 'sol/a')}.`, `Viene ${G('solo', 'sola', 'solo/a')}.`));
     else if (s.company || s.companyOther) {
       const who = s.companyOther || T(...COMPANY_TXT[s.company]);
@@ -116,23 +133,28 @@ const valoracio = {
     }
 
     const anthro = [s.weight && T(`Pes: ${s.weight} kg`, `Peso: ${s.weight} kg`), s.height && `Talla: ${s.height} cm`, imc(s) && `IMC: ${imc(s)} kg/m²`].filter(Boolean);
-    if (anthro.length) out.push('', anthro.join('   '));
-
-    const sc = (title, v, fn, max) => { const n = num(v); if (n == null) return; const r = fn(n, s.sex); out.push('', `${title}: ` + T(`resultat ${n}${max ? '/' + max : ''}, ${r[0]}.`, `resultado ${n}${max ? '/' + max : ''}, ${r[1]}.`)); };
-    sc(T('ÍNDEX DE BARTHEL', 'ÍNDICE DE BARTHEL'), s.barthel, barthel);
-    sc(T('LAWTON I BRODY', 'LAWTON Y BRODY'), s.lawton, lawton);
-    sc(T('MNA-CRIBRATGE', 'MNA-CRIBADO'), s.mna, mna, 14);
-    sc('PFEIFFER', s.pfeiffer, (n) => { const r = pfeiffer(n); return [`${n} ${n === 1 ? 'error' : 'errors'}, ${r[0]}`, `${n} ${n === 1 ? 'error' : 'errores'}, ${r[1]}`]; });
-    // Pfeiffer ja porta el número dins el text: neteja "resultat N, N errors" → "N errors".
-    if (num(s.pfeiffer) != null) out[out.length - 1] = out.at(-1).replace(/(resultat|resultado) \d+, /, '');
+    section(T('ANTROPOMETRIA:', 'ANTROPOMETRÍA:'), [anthro.join('   ')]);
+    section(T('VALORACIÓ FUNCIONAL:', 'VALORACIÓN FUNCIONAL:'), [
+      scale(T('Índex de Barthel', 'Índice de Barthel'), s.barthel, barthel),
+      scale(T('Lawton i Brody', 'Lawton y Brody'), s.lawton, lawton),
+    ]);
+    section(T('VALORACIÓ NUTRICIONAL:', 'VALORACIÓN NUTRICIONAL:'), [scale(T('MNA-cribratge', 'MNA-cribado'), s.mna, mna, 14)]);
+    const pf = num(s.pfeiffer);
+    section(T('VALORACIÓ COGNITIVA:', 'VALORACIÓN COGNITIVA:'), [
+      pf != null && `Pfeiffer: ` + T(`${pf} ${pf === 1 ? 'error' : 'errors'}, ${pfeiffer(pf)[0]}.`, `${pf} ${pf === 1 ? 'error' : 'errores'}, ${pfeiffer(pf)[1]}.`),
+      scale('Minimental (MMSE)', s.mmse, mmse, 30),
+    ]);
+    section(T('VALORACIÓ AFECTIVA:', 'VALORACIÓN AFECTIVA:'), [scale('Yesavage (GDS-15)', s.yesavage, yesavage, 15)]);
 
     const syn = pick(SYNDROMES, s.syndromes).map((x) => lbl(x, T).toLowerCase());
-    out.push('', syn.length ? T('Síndromes geriàtrics: ', 'Síndromes geriátricos: ') + joinList(syn, T) + '.' : T('No presenta síndromes geriàtrics.', 'No presenta síndromes geriátricos.'));
-    if (s.synNote) out.push(s.synNote);
+    section(T('SÍNDROMES GERIÀTRICS:', 'SÍNDROMES GERIÁTRICOS:'), [
+      syn.length ? joinList(syn, T).replace(/^./, (c) => c.toUpperCase()) + '.' : T('No presenta síndromes geriàtrics.', 'No presenta síndromes geriátricos.'),
+      s.synNote,
+    ]);
 
     const social = [];
     const lives = {
-      sol: T(`El pacient viu ${G('sol', 'sola', 'sol/a')} al seu pis.`, `El paciente vive ${G('solo', 'sola', 'solo/a')} en su piso.`),
+      sol: T(`Viu ${G('sol', 'sola', 'sol/a')} al seu pis.`, `Vive ${G('solo', 'sola', 'solo/a')} en su piso.`),
       parella: T('Viu amb la seva parella.', 'Vive con su pareja.'), fills: T('Viu amb els seus fills.', 'Vive con sus hijos.'),
       resid: T('Viu en una residència.', 'Vive en una residencia.'),
     }[s.lives];
@@ -140,21 +162,21 @@ const valoracio = {
     if (s.depend === 'no') social.push(T('No té la llei de dependència.', 'No tiene la ley de dependencia.'));
     else if (s.depend === 'tram') social.push(T('Té la llei de dependència en tràmit.', 'Tiene la ley de dependencia en trámite.'));
     else if (s.depend) social.push(T(`Té la llei de dependència grau ${s.depend}.`, `Tiene la ley de dependencia grado ${s.depend}.`));
-    for (const x of pick(SUPPORT, s.support)) social.push(T(`Té ${lbl(x, T).toLowerCase().replace(/^sad$/, 'SAD')}.`, `Tiene ${lbl(x, T).toLowerCase().replace(/^sad$/, 'SAD')}.`));
+    for (const x of pick(SUPPORT, s.support)) { const n = x.id === 'sad' ? 'SAD' : lbl(x, T).toLowerCase(); social.push(T(`Té ${n}.`, `Tiene ${n}.`)); }
     if (s.socialNote) social.push(s.socialNote);
-    if (social.length) out.push('', ...social);
+    section(T('SITUACIÓ SOCIAL:', 'SITUACIÓN SOCIAL:'), social);
 
     const acts = [...pick(ACTS, s.acts).map((x) => lbl(x, T)), s.actsOther].filter(Boolean);
-    if (acts.length) out.push('', T('Realitzo ', 'Realizo ') + joinList(acts, T) + '.');
+    section(T('ACTUACIÓ:', 'ACTUACIÓN:'), [acts.length && T('Realitzo ', 'Realizo ') + joinList(acts, T) + '.']);
 
     const plan = [];
     if (s.planType || s.planWhen) {
       const type = s.planType === 'tel' ? T('telefònica', 'telefónica') : T('presencial', 'presencial');
       const when = s.planWhen ? T(` d'aquí ${s.planWhen} ${s.planWhen === '1' ? 'mes' : 'mesos'}`, ` dentro de ${s.planWhen} ${s.planWhen === '1' ? 'mes' : 'meses'}`) : '';
-      plan.push(T(`Visita ${type}${when}.`, `Visita ${type}${when}.`));
+      plan.push(T(`- Visita ${type}${when}.`, `- Visita ${type}${when}.`));
     }
-    if (s.planOther) plan.push(s.planOther);
-    if (plan.length) out.push('', T('PLA: ', 'PLAN: ') + plan.join(' '));
+    if (s.planOther) plan.push('- ' + s.planOther);
+    section(T('PLA:', 'PLAN:'), plan);
     return out.join('\n');
   },
 };
