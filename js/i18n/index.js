@@ -23,3 +23,7 @@ export function t(key) {
   if (v == null) console.warn('i18n: falta la clau', key);
   return v ?? key;
 }
+
+// Text bilingüe inline: L('català', 'castellano'). tr() en resol l'idioma actual.
+export const L = (ca, es) => ({ ca, es });
+export const tr = (x) => (x && typeof x === 'object' ? (x[lang] ?? x.ca) : x ?? '');
