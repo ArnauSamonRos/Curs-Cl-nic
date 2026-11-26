@@ -25,4 +25,8 @@ export default {
   "editor.resetConfirm": "Esborrar totes les dades del formulari?",
   "editor.kbd": "←→ moure · ↑↓ camp · Espai marcar · Enter següent · Ctrl+Enter copiar · Alt+1…4 pestanya · Alt+N nou",
   "form.search": "Cerca…",
+  "tr.working": "Traduint…",
+  "tr.done": "✓ Traduït automàticament a l’idioma de la pantalla",
+  "tr.unsupported": "Aquest navegador no pot traduir (cal Chrome o Edge actualitzat): es copiarà tal qual",
+  "tr.error": "No s’ha pogut traduir ara: es copiarà tal qual",
 };

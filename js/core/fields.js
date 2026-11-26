@@ -1,7 +1,8 @@
 // Renderitzadors genèrics de camps. Una plantilla només declara camps; aquí es pinten.
 // Tipus: time, chips (single/multi), vitals, number, text, toggle.
 import { h } from './dom.js';
-import { t, tr } from '../i18n/index.js';
+import { t, tr, getLang } from '../i18n/index.js';
+import { translateTo } from './translate.js';
 import { nowHHMM } from './time.js';
 
 // onChange(structural): structural=true repinta el formulari (camps condicionals); false només la previsualització.
@@ -81,6 +82,29 @@ const RENDERERS = {
     el.value = s[f.id] ?? '';
     el.addEventListener('input', () => { s[f.id] = el.value; onChange(false); });
     return el;
+  },
+
+  // Text enganxat (p. ex. del metge) que es tradueix a l'idioma de la pantalla si cal.
+  // Desa: s[id] (original), s[id+'Tr'] (traduït), s[id+'TrLang'] (idioma del traduït).
+  translated(f, s, onChange) {
+    const el = h('textarea', { class: 'input textarea', rows: String(f.rows ?? 5), placeholder: tr(f.placeholder) });
+    el.value = s[f.id] ?? '';
+    const status = h('div', { class: 'field-hint' });
+    let timer, seq = 0;
+    const run = async () => {
+      const lang = getLang(), mine = ++seq, text = s[f.id] ?? '';
+      if (!text.trim()) { status.textContent = ''; return; }
+      status.textContent = t('tr.working');
+      const r = await translateTo(text, lang);
+      if (mine !== seq) return;
+      s[f.id + 'Tr'] = r.text; s[f.id + 'TrLang'] = lang;
+      status.textContent = r.status === 'ok' ? t('tr.done') : r.status === 'same' ? '' : r.status === 'error' ? t('tr.error') : t('tr.unsupported');
+      onChange(false);
+    };
+    el.addEventListener('input', () => { s[f.id] = el.value; s[f.id + 'TrLang'] = null; onChange(false); clearTimeout(timer); timer = setTimeout(run, 500); });
+    if (s[f.id] && s[f.id + 'TrLang'] !== getLang()) run();
+    else if (s[f.id + 'TrLang']) status.textContent = s[f.id + 'Tr'] !== s[f.id] ? t('tr.done') : '';
+    return h('div', { class: 'pick' }, el, status);
   },
 
   text(f, s, onChange) {

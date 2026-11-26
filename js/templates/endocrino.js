@@ -16,31 +16,6 @@ const bullets = (txt) => lines(txt).map((l) => (/^[-*•]/.test(l) ? l.replace(/
 // ---------- Opcions ----------
 const VISIT = [o('prog', 'Programada', 'Programada'), o('imp', 'Imprevista', 'Imprevista'), o('noprog', 'No programada', 'No programada')];
 const SEX = [o('h', 'Home', 'Hombre'), o('d', 'Dona', 'Mujer')];
-const DM = [
-  o('dm1', 'DM1', 'DM1'), o('dm2', 'DM2', 'DM2'), o('gest', 'Diabetis gestacional', 'Diabetes gestacional'),
-  o('dm2emb', 'DM2 + embaràs', 'DM2 + embarazo'), o('lada', 'LADA', 'LADA'), o('cortico', 'Hiperglucèmia per corticoides/QT', 'Hiperglucemia por corticoides/QT'),
-];
-const FROM = [
-  o('urg', 'Urgències', 'Urgencias'), o('cap', 'CAP / MEAP', 'CAP / MEAP'), o('gine', 'Ginecologia / Obstetrícia', 'Ginecología / Obstetricia'),
-  o('onco', 'HD Oncologia (QT)', 'HD Oncología (QT)'), o('endo', 'Consulta d’endocrí', 'Consulta de endocrino'), o('sala', 'Sala d’hospitalització', 'Sala de hospitalización'),
-];
-const FROM_TXT = {
-  urg: ["d'Urgències", 'desde Urgencias'], cap: ['del CAP', 'desde el CAP'], gine: ['de Ginecologia/Obstetrícia', 'desde Ginecología/Obstetricia'],
-  onco: ["de l'HD d'Oncologia", 'desde el HD de Oncología'], endo: ["de consulta d'endocrí", 'desde consulta de endocrino'], sala: ["de sala d'hospitalització", 'desde sala de hospitalización'],
-};
-const REASON = [
-  o('malcontrol', 'Mal control glucèmic', 'Mal control glucémico'), o('debut', 'Debut', 'Debut'),
-  o('hiper', 'Hiperglucèmia', 'Hiperglucemia'), o('insul', 'Inici d’insulina', 'Inicio de insulina'),
-  o('etd', 'Reforç ETD', 'Refuerzo ETD'), o('postmed', 'Seguiment post visita mèdica', 'Seguimiento tras visita médica'),
-];
-const REASON_TXT = {
-  malcontrol: ['mal control glucèmic', 'mal control glucémico'], debut: ['debut diabètic', 'debut diabético'],
-  hiper: ['hiperglucèmia', 'hiperglucemia'], insul: ["inici d'insulinització", 'inicio de insulinización'],
-  etd: ["reforç d'educació terapèutica en diabetis (ETD)", 'refuerzo de educación terapéutica en diabetes (ETD)'],
-  postmed: ['seguiment després de la visita mèdica', 'seguimiento tras la visita médica'],
-};
-const COMPANY = [o('sol', 'Sol/a', 'Solo/a'), o('acomp', 'Acompanyat/da', 'Acompañado/a'), o('familiar', 'Només familiars (no ve el pacient)', 'Solo familiares (no viene el paciente)')];
-
 const MEALS = [
   ['mEsm', L('Esmorzar', 'Desayuno')], ['mMig', L('Mig matí', 'Media mañana')], ['mDin', L('Dinar', 'Comida')],
   ['mBer', L('Berenar', 'Merienda')], ['mSop', L('Sopar', 'Cena')], ['mRes', L('Ressopó', 'Recena')],
@@ -99,45 +74,30 @@ const OUTCOME = [
 const F = {
   visit: { type: 'chips', id: 'visit', label: L('Visita', 'Visita'), options: VISIT },
   sex: { type: 'chips', id: 'sex', label: L('Sexe', 'Sexo'), options: SEX },
-  age: { type: 'number', id: 'age', label: L('Edat', 'Edad'), unit: L('anys', 'años') },
-  dm: { type: 'chips', id: 'dm', wide: true, label: L('Diagnòstic', 'Diagnóstico'), options: DM },
-  dmExtra: { type: 'text', id: 'dmExtra', wide: true, label: L('Altres dades (dx, comorbiditats, setmanes gestació…)', 'Otros datos (dx, comorbilidades, semanas gestación…)'), placeholder: L('p. ex. dx 2011, obesitat II', 'p. ej. dx 2011, obesidad II') },
-  from: { type: 'chips', id: 'from', wide: true, label: L('Derivat/da de', 'Derivado/a de'), options: FROM },
-  reason: { type: 'chips', id: 'reason', multi: true, wide: true, label: L('Motiu', 'Motivo'), options: REASON },
-  reasonExtra: { type: 'text', id: 'reasonExtra', wide: true, label: L('Detall del motiu', 'Detalle del motivo'), placeholder: L('p. ex. HbA1c 14%', 'p. ej. HbA1c 14%') },
-  company: { type: 'chips', id: 'company', wide: true, label: L('Acompanyant', 'Acompañante'), options: COMPANY },
-  companyWho: { type: 'text', id: 'companyWho', label: L('Amb qui', 'Con quién'), placeholder: L('la filla', 'la hija'), when: (s) => s.company && s.company !== 'sol' },
-  language: { type: 'text', id: 'language', label: L('Barrera idiomàtica (idioma)', 'Barrera idiomática (idioma)'), placeholder: L('anglès', 'inglés') },
-  social: { type: 'text', id: 'social', wide: true, label: L('Situació social / cuidador', 'Situación social / cuidador') },
   tto: { type: 'textarea', id: 'tto', wide: true, rows: 4, label: L('Tractament actual (una línia per fàrmac)', 'Tratamiento actual (una línea por fármaco)'), placeholder: L('Abasaglar 0-0-14\nMetformina 850 mg 1-0-1', 'Abasaglar 0-0-14\nMetformina 850 mg 1-0-1') },
   ttoNote: { type: 'text', id: 'ttoNote', wide: true, label: L('Adherència / canvis fets pel pacient', 'Adherencia / cambios hechos por el paciente') },
 };
 
-const patientSection = { title: L('Pacient', 'Paciente'), fields: [F.visit, F.sex, F.age, F.dm, F.dmExtra, F.from, F.reason, F.reasonExtra, F.company, F.companyWho, F.language, F.social] };
+// La presentació del pacient s'enganxa del curs del metge; només es tradueix si cal.
+const patientSection = { title: L('Pacient', 'Paciente'), fields: [
+  F.visit, F.sex,
+  { type: 'translated', id: 'medText', wide: true, rows: 5, label: L('Text del metge (Ctrl+V)', 'Texto del médico (Ctrl+V)'),
+    placeholder: L('Enganxa aquí la presentació del pacient…', 'Pega aquí la presentación del paciente…') },
+] };
 
 const baseState = () => ({
-  visit: 'prog', sex: null, age: '', dm: null, dmExtra: '', from: null, reason: [], reasonExtra: '',
-  company: null, companyWho: '', language: '', social: '', tto: '', ttoNote: '',
+  visit: 'prog', sex: null, medText: '', medTextTr: '', medTextTrLang: null, tto: '', ttoNote: '',
 });
 
 // ---------- Text compartit ----------
-function header(s, T, G) {
-  const out = [T('Visita ', 'Visita ') + lbl(pick(VISIT, [s.visit])[0] ?? VISIT[0], T).toLowerCase(), ''];
-  let p = G(T('Home', 'Hombre'), T('Dona', 'Mujer'), T('Pacient', 'Paciente'));
-  if (s.age) p += T(` de ${s.age} anys`, ` de ${s.age} años`);
-  const dm = pick(DM, [s.dm])[0];
-  if (dm || s.dmExtra) p += T(' amb ', ' con ') + [dm && lbl(dm, T), s.dmExtra].filter(Boolean).join(', ');
-  if (s.from) p += ', ' + T(G('derivat', 'derivada', 'derivat/da'), G('derivado', 'derivada', 'derivado/a')) + ' ' + T(...FROM_TXT[s.from]);
-  const reasons = [...s.reason.map((r) => T(...REASON_TXT[r]))];
-  if (reasons.length || s.reasonExtra) p += T(' per ', ' por ') + [joinList(reasons, T), s.reasonExtra && (reasons.length ? `(${s.reasonExtra})` : s.reasonExtra)].filter(Boolean).join(' ');
-  out.push(p + '.');
-  const extra = [];
-  if (s.company === 'sol') extra.push(T(`Ve ${G('sol', 'sola', 'sol/a')}`, `Viene ${G('solo', 'sola', 'solo/a')}`));
-  if (s.company === 'acomp') extra.push(T(`Ve ${G('acompanyat', 'acompanyada', 'acompanyat/da')}`, `Viene ${G('acompañado', 'acompañada', 'acompañado/a')}`) + (s.companyWho ? T(` de ${s.companyWho}`, ` de ${s.companyWho}`) : ''));
-  if (s.company === 'familiar') extra.push(T('El pacient no acut; venen', 'El paciente no acude; vienen') + (s.companyWho ? ` ${s.companyWho}` : T(' familiars', ' familiares')));
-  if (s.language) extra.push(T(`Barrera idiomàtica (parla ${s.language})`, `Barrera idiomática (habla ${s.language})`));
-  if (s.social) extra.push(s.social);
-  if (extra.length) out.push(extra.map((x) => x.replace(/\.$/, '')).join('. ') + '.');
+function header(s, T) {
+  const out = [T('Visita ', 'Visita ') + lbl(pick(VISIT, [s.visit])[0] ?? VISIT[0], T).toLowerCase()];
+  const lang = T('ca', 'es');
+  const txt = (s.medTextTrLang === lang ? s.medTextTr : s.medText) || '';
+  const body = txt.split('\n').map((l) => l.trimEnd());
+  while (body.length && !body[0]) body.shift();
+  while (body.length && !body.at(-1)) body.pop();
+  if (body.length) out.push('', ...body);
   return out;
 }
 function treatment(s, T) {

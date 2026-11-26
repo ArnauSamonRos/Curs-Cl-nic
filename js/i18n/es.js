@@ -25,4 +25,8 @@ export default {
   "editor.resetConfirm": "¿Borrar todos los datos del formulario?",
   "editor.kbd": "←→ mover · ↑↓ campo · Espacio marcar · Enter siguiente · Ctrl+Enter copiar · Alt+1…4 pestaña · Alt+N nuevo",
   "form.search": "Buscar…",
+  "tr.working": "Traduciendo…",
+  "tr.done": "✓ Traducido automáticamente al idioma de la pantalla",
+  "tr.unsupported": "Este navegador no puede traducir (hace falta Chrome o Edge actualizado): se copiará tal cual",
+  "tr.error": "No se ha podido traducir ahora: se copiará tal cual",
 };
