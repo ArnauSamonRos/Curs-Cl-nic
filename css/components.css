@@ -83,3 +83,11 @@
 .subfields { display: contents; }
 .field-hint { font-size: 12px; color: var(--c-text-muted); min-height: 16px; }
 .note { font-size: 13px; padding: 10px 12px; border-radius: 8px; background: var(--c-warn-bg); color: var(--c-text); }
+
+/* Pàgina inicial: les unitats omplen tota la pantalla. */
+.grid-home { grid-template-columns: repeat(4, 1fr); grid-auto-rows: 1fr; height: calc(100vh - 56px - 32px - 46px); min-height: 360px; }
+.grid-home .unit { justify-content: center; align-items: center; text-align: center; gap: 16px; }
+.grid-home .unit-code { align-self: center; font-size: 22px; padding: 8px 16px; border-radius: 10px; }
+.grid-home .unit-name { font-size: clamp(16px, 2vw, 24px); }
+@media (max-width: 900px) { .grid-home { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 500px) { .grid-home { height: auto; grid-auto-rows: 120px; } }
