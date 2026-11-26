@@ -21,7 +21,7 @@ export function Editor(unitId, template) {
   const modeTabs = h('div', { class: 'chips mode-tabs' });
   const form = h('div', { class: 'editor-form' });
   const preview = h('pre', { class: 'preview', 'aria-live': 'polite' });
-  const copyBtn = h('button', { type: 'button', class: 'btn-primary' }, t('editor.copy'));
+  const copyBtn = h('button', { type: 'button', class: 'btn-primary btn-copy' }, t('editor.copy'));
 
   function updatePreview() {
     const m = modeOf(), s = stateOf(m);
