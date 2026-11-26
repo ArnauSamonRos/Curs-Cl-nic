@@ -1,0 +1,18 @@
+.card { background: var(--c-surface); border-radius: var(--radius); box-shadow: var(--shadow); }
+.card-header { padding: 14px 16px; border-bottom: 1px solid var(--c-border); font-weight: 600; font-size: 15px; }
+.card-body { padding: 16px; }
+
+.grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+
+.unit { display: flex; flex-direction: column; gap: 10px; padding: 18px; cursor: pointer;
+  border: 1px solid transparent; transition: border-color .15s, transform .15s; text-align: left;
+  font: inherit; color: inherit; }
+.unit:hover, .unit:focus-visible { border-color: var(--c-primary); outline: none; transform: translateY(-1px); }
+.unit-code { align-self: flex-start; font-weight: 700; font-size: 13px; padding: 4px 8px;
+  border-radius: 6px; background: var(--c-primary-soft); color: var(--c-primary); }
+.unit-name { font-weight: 600; font-size: 15px; }
+.unit-desc { color: var(--c-text-muted); font-size: 13px; }
+
+.page-title { font-size: 18px; font-weight: 600; margin: 4px 0 16px; }
+.empty { text-align: center; color: var(--c-text-muted); padding: 48px 16px; }
+.pill { display: inline-block; padding: 3px 10px; border-radius: var(--radius-pill); background: var(--c-badge-bg); font-size: 12px; }

@@ -1,0 +1,20 @@
+/* Design tokens — inspirats en l'estació clínica de l'hospital. Canviar aquí afecta tota l'app. */
+:root {
+  --c-primary: #1f6fd1;
+  --c-primary-soft: #e3eefb;
+  --c-bg: #eef1f5;
+  --c-surface: #ffffff;
+  --c-border: #e2e6ec;
+  --c-text: #2b2f36;
+  --c-text-muted: #6b7380;
+  --c-badge-bg: #eceff3;
+  --c-warn-bg: #fdf0c4;
+  --c-ok-bg: #d9f3e3;
+  --radius: 12px;
+  --radius-pill: 999px;
+  --shadow: 0 1px 3px rgba(20, 30, 50, .08);
+  --font: "Open Sans", "Segoe UI", Roboto, Arial, sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin: 0; font-family: var(--font); font-size: 14px; color: var(--c-text); background: var(--c-bg); }
+a { color: var(--c-primary); text-decoration: none; }
