@@ -24,7 +24,7 @@ const chosen = (s) => (s.vaccines ?? []).filter((v) => sched(s)[v]);
 const visitMonths = (s) => [...new Set(chosen(s).flatMap((v) => sched(s)[v]))].sort((a, b) => a - b);
 // Dosis previstes per al mes M: [{ key, vac, i }]
 const dosesAt = (s, m) => chosen(s).flatMap((vac) => sched(s)[vac].map((off, i) => ({ key: `${vac}:${i}`, vac, i, off }))).filter((d) => d.off === m);
-const recompute = (s) => { s.given = dosesAt(s, s.month).map((d) => d.key); };
+const recompute = (s) => { s.given = dosesAt(s, s.month).map((d) => d.key); if (program(s)?.fixed) s.addNext = []; };
 
 // Pla: dosis futures agrupades per mes; les d'avui no administrades passen a la propera visita.
 function planGroups(s) {
@@ -50,6 +50,11 @@ const doseOptions = (s) => dosesAt(s, s.month).map(({ key, vac, i }) => {
 });
 
 const programOptions = Object.entries(PROGRAMS).map(([id, p]) => ({ id, label: p.label }));
+const isFixed = (s) => !!program(s)?.fixed;
+// Programes tancats: "Dia 1, Dia 2…" (ordre de visita); oberts: mes del programa.
+const visitLabel = (s, m, idx) => (isFixed(s)
+  ? L(`Dia ${idx + 1}`, `Día ${idx + 1}`)
+  : monthLabel(m));
 const monthLabel = (m) => (m === 0 ? L('Dia 0', 'Día 0') : L(m === 1 ? '1 mes' : `${m} mesos`, m === 1 ? '1 mes' : `${m} meses`));
 
 const vacunes = {
@@ -66,16 +71,20 @@ const vacunes = {
       { type: 'chips', id: 'program', required: true, wide: true, label: L('Derivat/da de', 'Derivado/a de'), options: programOptions,
         onSet: (s) => { s.vaccines = [...program(s).preset]; s.month = 0; s.addNext = []; recompute(s); } },
       { type: 'note', id: 'pnote', wide: true, text: (s) => program(s)?.note },
-      { type: 'chips', id: 'vaccines', multi: true, wide: true, label: L('Vacunes del programa', 'Vacunas del programa'),
+      { type: 'chips', id: 'vaccines', multi: true, wide: true, when: (s) => !isFixed(s), label: L('Vacunes del programa', 'Vacunas del programa'),
         options: (s) => Object.keys(sched(s)).map((v) => ({ id: v, label: L(nm(VACCINES[v].name).ca + warn(v), nm(VACCINES[v].name).es + warn(v)) })),
         onSet: recompute },
       { type: 'chips', id: 'month', required: true, wide: true, label: L('Visita d’avui', 'Visita de hoy'),
-        options: (s) => visitMonths(s).map((m) => ({ id: m, label: monthLabel(m) })), onSet: recompute },
+        options: (s) => visitMonths(s).map((m, i) => ({ id: m, label: visitLabel(s, m, i) })), onSet: recompute },
       { type: 'number', id: 'age', label: L('Edat', 'Edad'), unit: L('anys', 'años') },
       { type: 'text', id: 'context', wide: true, label: L('Context (opcional)', 'Contexto (opcional)'), placeholder: L('Post TASPE: 21/11/24', 'Post TASPE: 21/11/24') },
     ] },
     { title: L('Administro avui', 'Administro hoy'), fields: [
-      { type: 'chips', id: 'given', multi: true, wide: true, options: doseOptions, empty: L('Cap dosi prevista per a aquesta visita', 'Ninguna dosis prevista para esta visita') },
+      { type: 'note', id: 'fixedToday', wide: true, when: isFixed, text: (s) => {
+        const d = dosesAt(s, s.month);
+        return d.length ? L(d.map((x) => `${x.i + 1}a dosi ${nm(VACCINES[x.vac].name).ca} (${VACCINES[x.vac].brand})`).join(' · '), d.map((x) => `${x.i + 1}ª dosis ${nm(VACCINES[x.vac].name).es} (${VACCINES[x.vac].brand})`).join(' · ')) : null;
+      } },
+      { type: 'chips', id: 'given', multi: true, wide: true, when: (s) => !isFixed(s), options: doseOptions, empty: L('Cap dosi prevista per a aquesta visita', 'Ninguna dosis prevista para esta visita') },
       { type: 'text', id: 'extra', wide: true, label: L('Altres vacunes administrades', 'Otras vacunas administradas') },
       { type: 'toggle', id: 'explained', text: L('Explico pauta + possibles EA. Accepta', 'Explico pauta + posibles EA. Acepta') },
       { type: 'chips', id: 'incid', required: true, label: L('Incidències immediates', 'Incidencias inmediatas'), options: INCID },
@@ -89,7 +98,7 @@ const vacunes = {
           `Próxima visita dentro de ${g.off - s.month === 1 ? '1 mes' : `${g.off - s.month} meses`} (${addMonthsFmt(Date.now(), g.off - s.month)})`)
           : L('Programa completat: no queden dosis', 'Programa completado: no quedan dosis');
       } },
-      { type: 'chips', id: 'addNext', multi: true, wide: true, label: L('Afegir a la propera visita', 'Añadir a la próxima visita'),
+      { type: 'chips', id: 'addNext', multi: true, wide: true, when: (s) => !isFixed(s), label: L('Afegir a la propera visita', 'Añadir a la próxima visita'),
         options: (s) => Object.keys(VACCINES).filter((v) => !chosen(s).includes(v)).map((v) => ({ id: v, label: L(nm(VACCINES[v].name).ca + (isPneumo(v) ? ` (${VACCINES[v].brand})` : '') + warn(v), nm(VACCINES[v].name).es + (isPneumo(v) ? ` (${VACCINES[v].brand})` : '') + warn(v)) })) },
       { type: 'toggle', id: 'fullPlan', text: L('Mostrar tot el calendari pendent', 'Mostrar todo el calendario pendiente') },
     ] },
@@ -122,8 +131,9 @@ const vacunes = {
     if (!shown.length) out.push(T('- Programa de vacunació completat.', '- Programa de vacunación completado.'));
     for (const g of shown) {
       const n = g.off - s.month;
-      out.push(T(`- Programo per a ${g.doses.map(lbl).join(' + ')} d'aquí a ${months(n, T)} (${addMonthsFmt(Date.now(), n)}).`,
-        `- Programo para ${g.doses.map(lbl).join(' + ')} para dentro de ${months(n, T)} (${addMonthsFmt(Date.now(), n)}).`));
+      const day = isFixed(s) ? T(` (dia ${visitMonths(s).indexOf(g.off) + 1})`, ` (día ${visitMonths(s).indexOf(g.off) + 1})`) : '';
+      out.push(T(`- Programo per a ${g.doses.map(lbl).join(' + ')} d'aquí a ${months(n, T)} (${addMonthsFmt(Date.now(), n)})${day}.`,
+        `- Programo para ${g.doses.map(lbl).join(' + ')} para dentro de ${months(n, T)} (${addMonthsFmt(Date.now(), n)})${day}.`));
     }
     return out.join('\n');
   },

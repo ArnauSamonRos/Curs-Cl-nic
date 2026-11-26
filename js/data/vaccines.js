@@ -27,7 +27,7 @@ const BLUE_PRESET = ['hib', 'acwy', 'pn21', 'vha', 'vhb', 'vph', 'vhz'];
 const BLUE_NOTE = { ca: 'Atenuades només en no immunodeprimits (si immunodeprimit, esperar a finalitzar el tractament). VHA/VHB segons serologia. ACWY i zòster: 2a dosi entre 2 i 6 mesos.',
   es: 'Atenuadas solo en no inmunodeprimidos (si inmunodeprimido, esperar a finalizar el tratamiento). VHA/VHB según serología. ACWY y zóster: 2ª dosis entre 2 y 6 meses.' };
 
-// Programes. from: servei que deriva (s'omple sol). preset: vacunes marcades d'entrada; la resta es poden afegir.
+// Programes. from: servei que deriva. fixed: ordre tancat (es tria Dia 1, 2, 3… i no es poden canviar vacunes). preset: vacunes marcades d'entrada; la resta es poden afegir.
 // note: avís que surt al formulari (no al CC).
 export const PROGRAMS = {
   // Carnet BLAU — pacients amb biològics / immunosupressors, per servei
@@ -47,7 +47,7 @@ export const PROGRAMS = {
   },
   // Carnet TARONJA — TPH.
   tph: {
-    label: { ca: 'TPH', es: 'TPH' }, from: 'hemato',
+    label: { ca: 'TPH', es: 'TPH' }, from: 'hemato', fixed: true,
     schedule: { pn21: [0, 1, 2, 12], hexa: [0, 1, 2, 12], vhz: [0, 2], vha: [0, 6], acwy: [1, 6], menb: [1, 6], vph: [0, 2, 6], var: [24, 26], tv: [24, 26] },
     preset: ['pn21', 'hexa', 'vhz', 'vha', 'acwy', 'menb'],
     note: { ca: 'Atenuades sempre a partir dels 24 mesos post-TPH (12 en CAR-T) i havent finalitzat el tractament immunosupressor. Papil·loma si < 45 anys.',
@@ -55,7 +55,7 @@ export const PROGRAMS = {
   },
   // Carnet VERMELL — trasplantament d'òrgan sòlid.
   tos: {
-    label: { ca: 'Trasplantament', es: 'Trasplante' }, from: 'tx',
+    label: { ca: 'Trasplantament', es: 'Trasplante' }, from: 'tx', fixed: true,
     schedule: { pn21: [0], hib: [1], acwy: [0, 2], vhz: [0, 2], vha: [0, 6], vhb: [0, 1, 2, 12], vhab: [0, 1, 2, 12], td: [1], vph: [0, 2, 6], polio: [0], var: [0, 1], tv: [0, 1] },
     preset: ['pn21', 'hib', 'acwy', 'vhz', 'td'],
     note: { ca: 'Atenuades NOMÉS en pretrasplantament. VHA/VHB/VHA+B segons serologia (pauta ràpida). Papil·loma ≤ 45 anys. Polio: Afganistan/Pakistan. ACWY i zòster: 2a dosi entre 2 i 6 mesos.',
