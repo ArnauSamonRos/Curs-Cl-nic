@@ -49,7 +49,7 @@ const RENDERERS = {
     const chips = f.options.map((o) => {
       const on = s[f.id] === o.id;
       const el = h('button', { type: 'button', class: 'chip' + (on ? ' on' : ''), 'aria-pressed': String(on),
-        onclick: () => { s[f.id] = on ? null : o.id; onChange(true); } }, tr(o.label));
+        onclick: () => { s[f.id] = on ? null : o.id; f.onSet?.(s, s[f.id]); onChange(true); } }, tr(o.label));
       el._text = norm(tr(o.label));
       return el;
     });
@@ -98,17 +98,18 @@ const RENDERERS = {
       { id: 'un', label: t('vitals.nasal') },
       { id: 'vmk', label: t('vitals.venturi') },
     ];
+    const show = (k) => !f.show || f.show.includes(k);
     return h('div', { class: 'vitals' },
-      h('div', { class: 'vital' }, h('span', { class: 'vital-label' }, 'TA'),
+      show('ta') && h('div', { class: 'vital' }, h('span', { class: 'vital-label' }, 'TA'),
         input({ type: 'text', inputmode: 'numeric', class: 'input input-num', placeholder: '120' }, v.tas, (x) => { v.tas = x.trim(); onChange(false); }),
         h('span', { class: 'unit-suffix' }, '/'),
         input({ type: 'text', inputmode: 'numeric', class: 'input input-num', placeholder: '80' }, v.tad, (x) => { v.tad = x.trim(); onChange(false); }),
         h('span', { class: 'unit-suffix' }, 'mmHg')),
-      num('fc', 'FC', "x'", '80'),
-      num('fr', 'FR', "x'", '16'),
-      num('sat', 'SatO2', '%', '96'),
-      num('temp', 'Tª', 'ºC', '36,5'),
-      h('div', { class: 'vital vital-o2' },
+      show('fc') && num('fc', 'FC', "x'", '80'),
+      show('fr') && num('fr', 'FR', "x'", '16'),
+      show('sat') && num('sat', 'SatO2', '%', '96'),
+      show('temp') && num('temp', 'Tª', 'ºC', '36,5'),
+      show('sat') && h('div', { class: 'vital vital-o2' },
         h('div', { class: 'chips' }, o2opts.map((o) => h('button', {
           type: 'button', class: 'chip chip-sm' + (v.o2 === o.id ? ' on' : ''),
           onclick: () => { v.o2 = o.id; onChange(true); } }, o.label))),

@@ -6,6 +6,6 @@ export function h(tag, props = {}, ...children) {
     else if (k === 'class') el.className = v;
     else el.setAttribute(k, v);
   }
-  el.append(...children.flat().filter((c) => c != null));
+  el.append(...children.flat().filter((c) => c != null && c !== false));
   return el;
 }

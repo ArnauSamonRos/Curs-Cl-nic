@@ -2,7 +2,7 @@
 // Tractaments i proves: js/data/treatments.js. Estructura genèrica d'infusió / procediment;
 // els passos específics per tractament es poden afegir a la taula de tractaments.
 import { L } from '../i18n/index.js';
-import { nowHHMM } from '../core/time.js';
+import { nowHHMM, addMinutes } from '../core/time.js';
 import { formatVitals, joinList } from '../core/fields.js';
 import { TREATMENTS, getTreatment } from '../data/treatments.js';
 
@@ -32,16 +32,15 @@ const PREMED = [
   o('metil', 'Metilprednisolona 100 mg EV', 'Metilprednisolona 100 mg EV'),
   o('hidro', 'Hidrocortisona 100 mg EV', 'Hidrocortisona 100 mg EV'),
 ];
-const TOLERANCE = [
-  o('ok', 'Bona tolerància', 'Buena tolerancia'),
-  o('reac', 'Reacció', 'Reacción'),
-];
 const PREP = [
   o('dejuni', 'Dejuni comprovat', 'Ayuno comprobado'),
   o('ci', 'Consentiment signat', 'Consentimiento firmado'),
   o('alergies', 'Al·lèrgies revisades', 'Alergias revisadas'),
-  o('acomp', 'Ve acompanyat/da', 'Viene acompañado/a'),
 ];
+const COMPANY = [o('si', 'Acompanyat/da', 'Acompañado/a'), o('no', 'Sol/a', 'Solo/a')];
+const INCIDENTS = [o('no', 'Sense incidències', 'Sin incidencias'), o('si', 'Amb incidències', 'Con incidencias')];
+const SEX = [o('h', 'Home', 'Hombre'), o('d', 'Dona', 'Mujer')];
+const VITALS_SHOW = ['ta', 'fc', 'temp'];
 const POST = [
   o('oral', 'Tolerància oral', 'Tolerancia oral'),
   o('diuresi', 'Diüresi espontània', 'Diuresis espontánea'),
@@ -52,14 +51,17 @@ const POST = [
 // ---------- Camps compartits ----------
 const F = {
   time: { type: 'time', id: 'time', label: L('Hora d’arribada', 'Hora de llegada') },
-  sex: { type: 'chips', id: 'sex', label: L('Sexe', 'Sexo'), options: [o('h', 'Home', 'Hombre'), o('d', 'Dona', 'Mujer')] },
-  v0: { type: 'vitals', id: 'v0', wide: true },
+  sex: { type: 'chips', id: 'sex', label: L('Sexe', 'Sexo'), options: SEX },
+  company: { type: 'chips', id: 'company', label: L('Acompanyant', 'Acompañante'), options: COMPANY },
+  incidents: { type: 'chips', id: 'incidents', required: true, label: L('Incidències', 'Incidencias'), options: INCIDENTS },
+  incidentText: { type: 'text', id: 'incidentText', wide: true, label: L('Què ha passat i actuació', 'Qué ha pasado y actuación'), when: (s) => s.incidents === 'si' },
+  v0: { type: 'vitals', id: 'v0', wide: true, show: VITALS_SHOW },
   stable: { type: 'toggle', id: 'stable', text: L('Conscient, orientat/da i hemodinàmicament estable', 'Consciente, orientado/a y hemodinámicamente estable') },
   access: { type: 'chips', id: 'access', label: L('Accés venós', 'Acceso venoso'), options: ACCESS },
   gauge: { type: 'chips', id: 'gauge', label: L('Calibre', 'Calibre'), options: GAUGE, when: (s) => s.access === 'vvp' },
   site: { type: 'chips', id: 'site', label: L('Localització', 'Localización'), options: SITE, wide: true, when: (s) => s.access === 'vvp' },
   lab: { type: 'toggle', id: 'lab', text: L('Extracció d’analítica', 'Extracción de analítica') },
-  v1: { type: 'vitals', id: 'v1', wide: true },
+  v1: { type: 'vitals', id: 'v1', wide: true, show: VITALS_SHOW },
   dischargeTime: { type: 'time', id: 'dischargeTime', label: L('Hora d’alta', 'Hora de alta') },
   removeVvp: { type: 'toggle', id: 'removeVvp', text: L('Retirada de via perifèrica', 'Retirada de vía periférica'), when: (s) => s.access === 'vvp' },
   next: { type: 'text', id: 'next', wide: true, label: L('Propera visita', 'Próxima visita') },
@@ -67,7 +69,7 @@ const F = {
 };
 
 const baseState = () => ({
-  time: nowHHMM(), sex: null, v0: { o2: 'aire' }, stable: true,
+  time: nowHHMM(), sex: null, company: null, incidents: 'no', incidentText: '', v0: { o2: 'aire' }, stable: true,
   access: 'vvp', gauge: '22', site: null, lab: false,
   v1: { o2: 'aire' }, dischargeTime: '', removeVvp: true, next: '', obs: '',
 });
@@ -92,14 +94,21 @@ function accessLine(s, T) {
   if (s.access === 'picc') return T('Ús de PICC, comprovat permeable', 'Uso de PICC, comprobado permeable');
   return null;
 }
-function tail(s, T) {
+function incidentLine(s, T) {
+  return s.incidents === 'si'
+    ? T('Incidències', 'Incidencias') + (s.incidentText ? `: ${s.incidentText}` : '')
+    : T('Sense incidències', 'Sin incidencias');
+}
+function tail(s, T, G) {
   const out = ['', T('VALORACIÓ FINAL:', 'VALORACIÓN FINAL:')];
   const v1 = formatVitals(s.v1, T);
   if (v1) out.push(v1);
   if (s.access === 'vvp' && s.removeVvp) out.push(T('Es retira via perifèrica sense incidències.', 'Se retira vía periférica sin incidencias.'));
   if (s.obs) out.push(s.obs);
   out.push('', T('SEGUIMENT:', 'SEGUIMIENTO:'));
-  out.push(T(`A les ${hhmm(s.dischargeTime)} hores, alta.`, `A las ${hhmm(s.dischargeTime)} horas, alta.`)
+  const comp = s.company === 'si' ? T(` ${G('acompanyat', 'acompanyada', 'acompanyat/da')}`, ` ${G('acompañado', 'acompañada', 'acompañado/a')}`)
+    : s.company === 'no' ? T(` ${G('sol', 'sola', 'sol/a')}`, ` ${G('solo', 'sola', 'solo/a')}`) : '';
+  out.push(T(`A les ${hhmm(s.dischargeTime)} hores, alta${comp}.`, `A las ${hhmm(s.dischargeTime)} horas, alta${comp}.`)
     + (s.next ? ' ' + T(`Propera visita: ${s.next}.`, `Próxima visita: ${s.next}.`) : ''));
   return out;
 }
@@ -108,21 +117,22 @@ function tail(s, T) {
 const tractament = {
   id: 'tto',
   label: L('Tractament', 'Tratamiento'),
-  init: () => ({ ...baseState(), tto: null, dose: '', premed: [], start: '', end: '', tolerance: 'ok', reaction: '' }),
+  init: () => ({ ...baseState(), tto: null, dose: '', premed: [], start: '', durMin: '', end: '' }),
   sections: [
     { title: L('Tractament', 'Tratamiento'), fields: [
-      { type: 'pick', id: 'tto', wide: true, options: TTOS },
-      { type: 'text', id: 'dose', label: L('Dosi', 'Dosis') },
-      F.time,
+      // En triar el tractament, s'omple la durada prevista de l'organitzador de llits.
+      { type: 'pick', id: 'tto', wide: true, options: TTOS, onSet: (s, id) => { s.durMin = String(getTreatment(id)?.dur ?? ''); } },
+      { type: 'text', id: 'dose', label: L('Quantitat / dosi', 'Cantidad / dosis') },
+      F.time, F.sex, F.company,
     ] },
     { title: L('Valoració inicial', 'Valoración inicial'), fields: [F.v0, F.stable] },
-    { title: L('Intervenció', 'Intervención'), fields: [
+    { title: L('Administració', 'Administración'), fields: [
       F.access, F.gauge, F.site, F.lab,
       { type: 'chips', id: 'premed', multi: true, wide: true, label: L('Premedicació', 'Premedicación'), options: PREMED },
-      { type: 'time', id: 'start', label: L('Inici infusió', 'Inicio infusión') },
-      { type: 'time', id: 'end', label: L('Final infusió', 'Final infusión') },
-      { type: 'chips', id: 'tolerance', label: L('Tolerància', 'Tolerancia'), options: TOLERANCE },
-      { type: 'text', id: 'reaction', wide: true, label: L('Descripció de la reacció i actuació', 'Descripción de la reacción y actuación'), when: (s) => s.tolerance === 'reac' },
+      { type: 'time', id: 'start', label: L('Hora inici', 'Hora inicio') },
+      { type: 'number', id: 'durMin', label: L('Durada', 'Duración'), unit: 'min' },
+      { type: 'time', id: 'end', label: L('Hora final (buit = inici + durada)', 'Hora final (vacío = inicio + duración)') },
+      F.incidents, F.incidentText,
     ] },
     { title: L('Valoració final i alta', 'Valoración final y alta'), fields: [F.v1, F.removeVvp, F.dischargeTime, F.next, F.obs] },
   ],
@@ -133,13 +143,16 @@ const tractament = {
     const items = [accessLine(s, T)];
     if (s.lab) items.push(T('Extracció d’analítica', 'Extracción de analítica'));
     if (s.premed.length) items.push(T('Premedicació: ', 'Premedicación: ') + pick(PREMED, s.premed).map((x) => lbl(x, T)).join(', '));
-    let adm = T(`Administració de ${name}`, `Administración de ${name}`) + (s.dose ? ` ${s.dose}` : '') + T(' segons pauta', ' según pauta');
-    if (s.start || s.end) adm += T(` (inici ${hhmm(s.start)} h, final ${hhmm(s.end)} h)`, ` (inicio ${hhmm(s.start)} h, final ${hhmm(s.end)} h)`);
-    items.push(adm);
-    if (s.tolerance === 'ok') items.push(T('Bona tolerància, sense incidències', 'Buena tolerancia, sin incidencias'));
-    if (s.tolerance === 'reac') items.push(T('Reacció durant la infusió', 'Reacción durante la infusión') + (s.reaction ? `: ${s.reaction}` : ''));
+    items.push(T(`Administració de ${name}`, `Administración de ${name}`) + (s.dose ? ` ${s.dose}` : '') + '.');
+    const end = s.end || addMinutes(s.start, s.durMin);
+    const timing = [];
+    if (s.start) timing.push(T(`inici ${s.start} h`, `inicio ${s.start} h`));
+    if (end) timing.push(`final ${end} h`);
+    if (s.durMin) timing.push(T(`durada ${s.durMin} min`, `duración ${s.durMin} min`));
+    if (timing.length) items.push(timing.join(', ').replace(/^./, (c) => c.toUpperCase()) + '.');
+    items.push(incidentLine(s, T) + '.');
     out.push('', T('INTERVENCIÓ:', 'INTERVENCIÓN:'), ...items.filter(Boolean).map((x) => '- ' + x));
-    return [...out, ...tail(s, T)].join('\n');
+    return [...out, ...tail(s, T, G)].join('\n');
   },
 };
 
@@ -148,7 +161,7 @@ const prova = {
   label: L('Prova / procediment', 'Prueba / procedimiento'),
   init: () => ({ ...baseState(), proc: null, prep: ['dejuni', 'ci'], outTime: '', backTime: '', post: [] }),
   sections: [
-    { title: L('Prova', 'Prueba'), fields: [{ type: 'pick', id: 'proc', wide: true, options: PROCS }, F.time, F.sex] },
+    { title: L('Prova', 'Prueba'), fields: [{ type: 'pick', id: 'proc', wide: true, options: PROCS }, F.time, F.sex, F.company] },
     { title: L('Valoració inicial', 'Valoración inicial'), fields: [F.v0, F.stable] },
     { title: L('Preparació', 'Preparación'), fields: [
       { type: 'chips', id: 'prep', multi: true, wide: true, options: PREP },
@@ -158,6 +171,7 @@ const prova = {
     ] },
     { title: L('Post-prova', 'Post-prueba'), fields: [
       { type: 'chips', id: 'post', multi: true, wide: true, options: POST },
+      F.incidents, F.incidentText,
       F.v1, F.removeVvp, F.dischargeTime, F.next, F.obs,
     ] },
   ],
@@ -165,18 +179,17 @@ const prova = {
     const p = getTreatment(s.proc);
     const name = p ? lbl(p, T).toLowerCase() : '___';
     const out = head(s, T, G, T(`per a la realització de ${name}`, `para la realización de ${name}`));
-    const prep = pick(PREP, s.prep).map((x) => {
-      if (x.id === 'acomp') return T(`Ve ${G('acompanyat', 'acompanyada', 'acompanyat/da')}`, `Viene ${G('acompañado', 'acompañada', 'acompañado/a')}`);
-      return lbl(x, T);
-    });
+    const prep = pick(PREP, s.prep).map((x) => lbl(x, T));
     const items = [...prep, accessLine(s, T)];
     if (s.lab) items.push(T('Extracció d’analítica', 'Extracción de analítica'));
     if (s.outTime) items.push(T(`A les ${s.outTime} hores surt a realitzar-se la prova`, `A las ${s.outTime} horas sale a realizarse la prueba`));
     if (s.backTime) items.push(T(`A les ${s.backTime} hores torna de la prova`, `A las ${s.backTime} horas vuelve de la prueba`));
     out.push('', T('INTERVENCIÓ:', 'INTERVENCIÓN:'), ...items.filter(Boolean).map((x) => '- ' + x));
     const post = pick(POST, s.post).map((x) => lbl(x, T));
-    if (post.length) out.push('', T('POST-PROVA:', 'POST-PRUEBA:'), joinList(post, T) + '.');
-    return [...out, ...tail(s, T)].join('\n');
+    out.push('', T('POST-PROVA:', 'POST-PRUEBA:'));
+    if (post.length) out.push(joinList(post, T) + '.');
+    out.push(incidentLine(s, T) + '.');
+    return [...out, ...tail(s, T, G)].join('\n');
   },
 };
 
