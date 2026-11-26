@@ -2,4 +2,5 @@
 import respiratori from './respiratori.js';
 import polivalent from './polivalent.js';
 import endocrino from './endocrino.js';
-export const TEMPLATES = { respiratori, 'polivalent-1': polivalent, 'polivalent-2': polivalent, endocrino };
+import vacunes from './vacunes.js';
+export const TEMPLATES = { respiratori, 'polivalent-1': polivalent, 'polivalent-2': polivalent, endocrino, vacunacio: vacunes, infeccioses: vacunes };

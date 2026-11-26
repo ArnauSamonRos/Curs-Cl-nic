@@ -30,14 +30,18 @@ const RENDERERS = {
 
   chips(f, s, onChange) {
     const sel = () => (f.multi ? s[f.id] ?? [] : s[f.id]);
+    // options pot ser una funció de l'estat (opcions dinàmiques).
+    const opts = typeof f.options === 'function' ? f.options(s) : f.options;
+    if (!opts.length && f.empty) return h('div', { class: 'field-hint' }, tr(f.empty));
     return h('div', { class: 'chips', role: f.multi ? 'group' : 'radiogroup' },
-      f.options.map((o) => {
+      opts.map((o) => {
         const on = f.multi ? sel().includes(o.id) : sel() === o.id;
         return h('button', {
           type: 'button', class: 'chip' + (on ? ' on' : ''), 'aria-pressed': String(on),
           onclick: () => {
             if (f.multi) s[f.id] = on ? sel().filter((x) => x !== o.id) : [...sel(), o.id];
             else s[f.id] = on && !f.required ? null : o.id;
+            f.onSet?.(s, s[f.id]);
             onChange(true);
           },
         }, tr(o.label));
@@ -67,6 +71,12 @@ const RENDERERS = {
         document.activeElement?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true })); }
     });
     return h('div', { class: 'pick' }, filter, h('div', { class: 'chips' }, chips));
+  },
+
+  // Text informatiu (no editable), p. ex. avisos del protocol.
+  note(f, s) {
+    const txt = tr(typeof f.text === 'function' ? f.text(s) : f.text);
+    return txt ? h('div', { class: 'note' }, txt) : null;
   },
 
   number(f, s, onChange) {
