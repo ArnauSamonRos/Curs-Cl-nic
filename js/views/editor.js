@@ -46,7 +46,7 @@ export function Editor(unitId, template) {
       onclick: () => { draft.mode = x.id; renderForm(); },
     }, tr(x.label))));
     const onChange = (structural) => { if (structural) renderForm(); else updatePreview(); };
-    form.replaceChildren(...m.sections.map((sec) => {
+    form.replaceChildren(...m.sections.filter((sec) => !sec.when || sec.when(s)).map((sec) => {
       const fields = sec.fields.filter((f) => !f.when || f.when(s));
       return h('div', { class: 'card' },
         h('div', { class: 'card-header' }, tr(sec.title)),
