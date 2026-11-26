@@ -67,7 +67,7 @@ const valoracio = {
   init: () => ({
     sex: null, reason: ['cog'], reasonExtra: '', company: null, companyOther: '',
     weight: '', height: '', barthel: '', lawton: '', mna: '', pfeiffer: '', mmse: '', yesavage: '', syndromes: [], synNote: '',
-    lives: null, depend: null, support: [], socialNote: '', acts: [], actsOther: '',
+    lives: null, depend: null, disab: null, disabPct: '', support: [], socialNote: '', acts: [], actsOther: '',
     planType: 'pres', planWhen: '6', planOther: '',
   }),
   sections: [
@@ -104,6 +104,8 @@ const valoracio = {
     { title: L('Situació social', 'Situación social'), fields: [
       { type: 'chips', id: 'lives', wide: true, label: L('Viu', 'Vive'), options: LIVES },
       { type: 'chips', id: 'depend', wide: true, label: L('Llei de dependència', 'Ley de dependencia'), options: DEPEND },
+      { type: 'chips', id: 'disab', label: L('Discapacitat', 'Discapacidad'), options: [o('no', 'No', 'No'), o('tram', 'En tràmit', 'En trámite'), o('si', 'Sí', 'Sí')] },
+      { type: 'number', id: 'disabPct', label: L('Grau de discapacitat', 'Grado de discapacidad'), unit: '%', when: (s) => s.disab === 'si' },
       { type: 'chips', id: 'support', multi: true, wide: true, label: L('Recursos', 'Recursos'), options: SUPPORT },
       { type: 'text', id: 'socialNote', wide: true, label: L('Comentari', 'Comentario') },
     ] },
@@ -134,17 +136,15 @@ const valoracio = {
 
     const anthro = [s.weight && T(`Pes: ${s.weight} kg`, `Peso: ${s.weight} kg`), s.height && `Talla: ${s.height} cm`, imc(s) && `IMC: ${imc(s)} kg/m²`].filter(Boolean);
     section(T('ANTROPOMETRIA:', 'ANTROPOMETRÍA:'), [anthro.join('   ')]);
-    section(T('VALORACIÓ FUNCIONAL:', 'VALORACIÓN FUNCIONAL:'), [
+    const pf = num(s.pfeiffer);
+    section(T('ESCALES DE VALORACIÓ:', 'ESCALAS DE VALORACIÓN:'), [
       scale(T('Índex de Barthel', 'Índice de Barthel'), s.barthel, barthel),
       scale(T('Lawton i Brody', 'Lawton y Brody'), s.lawton, lawton),
-    ]);
-    section(T('VALORACIÓ NUTRICIONAL:', 'VALORACIÓN NUTRICIONAL:'), [scale(T('MNA-cribratge', 'MNA-cribado'), s.mna, mna, 14)]);
-    const pf = num(s.pfeiffer);
-    section(T('VALORACIÓ COGNITIVA:', 'VALORACIÓN COGNITIVA:'), [
+      scale(T('MNA-cribratge', 'MNA-cribado'), s.mna, mna, 14),
       pf != null && `Pfeiffer: ` + T(`${pf} ${pf === 1 ? 'error' : 'errors'}, ${pfeiffer(pf)[0]}.`, `${pf} ${pf === 1 ? 'error' : 'errores'}, ${pfeiffer(pf)[1]}.`),
       scale('Minimental (MMSE)', s.mmse, mmse, 30),
+      scale('Yesavage (GDS-15)', s.yesavage, yesavage, 15),
     ]);
-    section(T('VALORACIÓ AFECTIVA:', 'VALORACIÓN AFECTIVA:'), [scale('Yesavage (GDS-15)', s.yesavage, yesavage, 15)]);
 
     const syn = pick(SYNDROMES, s.syndromes).map((x) => lbl(x, T).toLowerCase());
     section(T('SÍNDROMES GERIÀTRICS:', 'SÍNDROMES GERIÁTRICOS:'), [
@@ -162,6 +162,9 @@ const valoracio = {
     if (s.depend === 'no') social.push(T('No té la llei de dependència.', 'No tiene la ley de dependencia.'));
     else if (s.depend === 'tram') social.push(T('Té la llei de dependència en tràmit.', 'Tiene la ley de dependencia en trámite.'));
     else if (s.depend) social.push(T(`Té la llei de dependència grau ${s.depend}.`, `Tiene la ley de dependencia grado ${s.depend}.`));
+    if (s.disab === 'no') social.push(T('No té reconeguda la discapacitat.', 'No tiene reconocida la discapacidad.'));
+    else if (s.disab === 'tram') social.push(T('Té la discapacitat en tràmit.', 'Tiene la discapacidad en trámite.'));
+    else if (s.disab === 'si') social.push(T(`Té reconeguda la discapacitat${s.disabPct ? ` del ${s.disabPct}%` : ''}.`, `Tiene reconocida la discapacidad${s.disabPct ? ` del ${s.disabPct}%` : ''}.`));
     for (const x of pick(SUPPORT, s.support)) { const n = x.id === 'sad' ? 'SAD' : lbl(x, T).toLowerCase(); social.push(T(`Té ${n}.`, `Tiene ${n}.`)); }
     if (s.socialNote) social.push(s.socialNote);
     section(T('SITUACIÓ SOCIAL:', 'SITUACIÓN SOCIAL:'), social);
