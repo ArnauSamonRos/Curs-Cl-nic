@@ -1,0 +1,13 @@
+HD RESPIRATORI
+
+A las 09:00 horas, acude al HDR.
+
+VALORACIÓN INICIAL:
+Está consciente, orientado/a y hemodinámicamente estable.
+
+SEGUIMIENTO:
+Se decide ingreso hospitalario por ___.
+Realizada "hoja de atención al usuario del hospital" como seguimiento de enfermería.
+
+VALORACIÓN FINAL:
+Traslado a sala ___ para ingreso a las __:__ horas.

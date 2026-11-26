@@ -2,8 +2,9 @@
 // Tries programa i visita → s'omplen soles les dosis d'avui → el PLA (properes dosis i data) es calcula sol.
 import { L } from '../i18n/index.js';
 import { VACCINES, PROGRAMS, addMonthsFmt } from '../data/vaccines.js';
+import { o, noShowMode } from './kit.js';
+import { program, isFixed, chosen, programVaccines, visitMonths, dosesAt, selectDueDoses, planGroups } from '../domain/vaccinePlan.js';
 
-const o = (id, ca, es) => ({ id, label: L(ca, es) });
 const nm = (v) => (typeof v === 'object' ? v : { ca: v, es: v });
 const vName = (id, T) => { const n = nm(VACCINES[id].name); return T(n.ca, n.es); };
 const ord = (i, T) => T(`${i + 1}a dosi`, `${i + 1}ª dosis`);
@@ -17,31 +18,7 @@ const FROM = [
 ];
 const INCID = [o('no', 'Sense incidències', 'Sin incidencias'), o('si', 'Amb incidències', 'Con incidencias')];
 
-// ---------- Lògica del calendari ----------
-const program = (s) => PROGRAMS[s.program];
-const sched = (s) => program(s)?.schedule ?? {};
-const chosen = (s) => (s.vaccines ?? []).filter((v) => sched(s)[v]);
-const visitMonths = (s) => [...new Set(chosen(s).flatMap((v) => sched(s)[v]))].sort((a, b) => a - b);
-// Dosis previstes per al mes M: [{ key, vac, i }]
-const dosesAt = (s, m) => chosen(s).flatMap((vac) => sched(s)[vac].map((off, i) => ({ key: `${vac}:${i}`, vac, i, off }))).filter((d) => d.off === m);
-const recompute = (s) => { s.given = dosesAt(s, s.month).map((d) => d.key); if (program(s)?.fixed) s.addNext = []; };
-
-// Pla: dosis futures agrupades per mes; les d'avui no administrades passen a la propera visita.
-function planGroups(s) {
-  const future = chosen(s).flatMap((vac) => sched(s)[vac].map((off, i) => ({ vac, i, off }))).filter((d) => d.off > s.month);
-  const missed = dosesAt(s, s.month).filter((d) => !s.given.includes(d.key));
-  // Vacunes afegides des del PLA: la seva 1a dosi va a la propera visita.
-  missed.push(...(s.addNext ?? []).filter((v) => !chosen(s).includes(v)).map((vac) => ({ vac, i: 0 })));
-  const groups = new Map();
-  for (const d of future) { if (!groups.has(d.off)) groups.set(d.off, []); groups.get(d.off).push(d); }
-  const offs = [...groups.keys()].sort((a, b) => a - b);
-  if (missed.length) {
-    const next = offs[0] ?? s.month + 1;
-    if (!groups.has(next)) { groups.set(next, []); offs.unshift(next); }
-    groups.get(next).unshift(...missed);
-  }
-  return offs.map((off) => ({ off, doses: groups.get(off) }));
-}
+const recompute = selectDueDoses;
 
 const warn = (vac) => (VACCINES[vac].live ? ' ⚠' : '');
 const doseOptions = (s) => dosesAt(s, s.month).map(({ key, vac, i }) => {
@@ -50,7 +27,6 @@ const doseOptions = (s) => dosesAt(s, s.month).map(({ key, vac, i }) => {
 });
 
 const programOptions = Object.entries(PROGRAMS).map(([id, p]) => ({ id, label: p.label }));
-const isFixed = (s) => !!program(s)?.fixed;
 // Programes tancats: "Dia 1, Dia 2…" (ordre de visita); oberts: mes del programa.
 const visitLabel = (s, m, idx) => (isFixed(s)
   ? L(`Dia ${idx + 1}`, `Día ${idx + 1}`)
@@ -72,7 +48,7 @@ const vacunes = {
         onSet: (s) => { s.vaccines = [...program(s).preset]; s.month = 0; s.addNext = []; recompute(s); } },
       { type: 'note', id: 'pnote', wide: true, text: (s) => program(s)?.note },
       { type: 'chips', id: 'vaccines', multi: true, wide: true, when: (s) => !isFixed(s), label: L('Vacunes del programa', 'Vacunas del programa'),
-        options: (s) => Object.keys(sched(s)).map((v) => ({ id: v, label: L(nm(VACCINES[v].name).ca + warn(v), nm(VACCINES[v].name).es + warn(v)) })),
+        options: (s) => programVaccines(s).map((v) => ({ id: v, label: L(nm(VACCINES[v].name).ca + warn(v), nm(VACCINES[v].name).es + warn(v)) })),
         onSet: recompute },
       { type: 'chips', id: 'month', required: true, wide: true, label: L('Visita d’avui', 'Visita de hoy'),
         options: (s) => visitMonths(s).map((m, i) => ({ id: m, label: visitLabel(s, m, i) })), onSet: recompute },
@@ -138,14 +114,6 @@ const vacunes = {
   },
 };
 
-const noShow = {
-  id: 'noacut',
-  label: L('No acut', 'No acude'),
-  init: () => ({ noShowNote: '' }),
-  sections: [{ title: L('No acut', 'No acude'), fields: [{ type: 'text', id: 'noShowNote', wide: true, label: L('Detall (opcional)', 'Detalle (opcional)') }] }],
-  render(s, T) {
-    return T("No acut a l'administració de les vacunes programades", 'No acude a la administración de las vacunas programadas') + (s.noShowNote ? ` (${s.noShowNote})` : '') + '.';
-  },
-};
+const noShow = noShowMode(["No acut a l'administració de les vacunes programades", 'No acude a la administración de las vacunas programadas']);
 
 export default { modes: [vacunes, noShow] };

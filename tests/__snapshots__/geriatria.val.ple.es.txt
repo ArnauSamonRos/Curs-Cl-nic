@@ -1,0 +1,31 @@
+HD GERIATRIA
+
+Paciente acude a visita de Geriatría para valoración de deterioro cognitivo.
+Acompañada por su hija.
+
+ANTROPOMETRÍA:
+Peso: 61 kg   Talla: 161 cm   IMC: 23,5 kg/m²
+
+ESCALAS DE VALORACIÓN:
+Índice de Barthel: 100, autónoma.
+Lawton y Brody: 3, dependencia grave.
+MNA-cribado: 14/14, estado nutricional normal.
+Pfeiffer: 1 error, normal.
+Minimental (MMSE): 22/30, deterioro cognitivo leve.
+Yesavage (GDS-15): 7/15, probable depresión.
+
+SÍNDROMES GERIÁTRICOS:
+No presenta síndromes geriátricos.
+
+SITUACIÓN SOCIAL:
+Vive sola en su piso.
+Tiene la ley de dependencia grado 1.
+Tiene reconocida la discapacidad del 65%.
+Tiene teleasistencia.
+Tiene SAD.
+
+ACTUACIÓN:
+Realizo A/S.
+
+PLAN:
+- Visita presencial dentro de 6 meses.

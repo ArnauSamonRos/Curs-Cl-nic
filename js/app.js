@@ -22,4 +22,11 @@ function renderChrome(path) {
 }
 
 onLangChange(refresh);
+
+// En local, avisa a la consola si alguna plantilla està mal configurada.
+if (['localhost', '127.0.0.1'].includes(location.hostname)) {
+  Promise.all([import('./core/schema.js'), import('./templates/index.js')]).then(([{ validateTemplate }, { TEMPLATES }]) => {
+    for (const [n, tpl] of Object.entries(TEMPLATES)) validateTemplate(n, tpl).forEach((e) => console.error(e));
+  });
+}
 start(document.getElementById('app'), renderChrome);

@@ -1,0 +1,31 @@
+HD GERIATRIA
+
+Pacient acut a visita de Geriatria per valoració de deteriorament cognitiu.
+Acompanyada per la seva filla.
+
+ANTROPOMETRIA:
+Pes: 61 kg   Talla: 161 cm   IMC: 23,5 kg/m²
+
+ESCALES DE VALORACIÓ:
+Índex de Barthel: 100, autònoma.
+Lawton i Brody: 3, dependència greu.
+MNA-cribratge: 14/14, estat nutricional normal.
+Pfeiffer: 1 error, normal.
+Minimental (MMSE): 22/30, deteriorament cognitiu lleu.
+Yesavage (GDS-15): 7/15, probable depressió.
+
+SÍNDROMES GERIÀTRICS:
+No presenta síndromes geriàtrics.
+
+SITUACIÓ SOCIAL:
+Viu sola al seu pis.
+Té la llei de dependència grau 1.
+Té reconeguda la discapacitat del 65%.
+Té teleassistència.
+Té SAD.
+
+ACTUACIÓ:
+Realitzo A/S.
+
+PLA:
+- Visita presencial d'aquí 6 mesos.

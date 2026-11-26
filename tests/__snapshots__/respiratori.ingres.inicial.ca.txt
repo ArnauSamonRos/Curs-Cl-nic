@@ -1,0 +1,13 @@
+HD RESPIRATORI
+
+A les 09:00 hores, acudeix a l'HDR.
+
+VALORACIÓ INICIAL:
+Està conscient, orientat/da i hemodinàmicament estable.
+
+SEGUIMENT:
+Es decideix ingrés hospitalari per ___.
+Fet "full d’atenció a l’usuari de l’hospital" com a seguiment d’infermeria.
+
+VALORACIÓ FINAL:
+Trasllat a sala ___ per ingrés a les __:__ hores.

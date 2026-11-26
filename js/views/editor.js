@@ -5,23 +5,16 @@ import { copyRich } from '../core/clipboard.js';
 import { getDraft, resetDraft } from '../core/store.js';
 import { t, tr, getLang } from '../i18n/index.js';
 import { attachKeyNav, focusKey, restoreFocus, focusFirst } from '../core/keynav.js';
-
-// Línia de títol de secció: "SEGUIMENT:", "VALORACIÓ INICIAL:"…
-const HEADING = /^[A-ZÀ-ÜÇ' ]+:$/;
+import { buildCourse, ensureState } from '../core/course.js';
 
 export function Editor(unitId, template) {
   const key = 'cc:' + unitId;
   const draft = getDraft(key, () => ({ mode: template.modes[0].id, data: {} }));
   const modeOf = () => template.modes.find((m) => m.id === draft.mode);
-  // Estat compartit entre modes: canviar General→Ingrés conserva hora, constants, intervencions…
-  const stateOf = (m) => {
-    for (const [k, v] of Object.entries(m.init())) if (!(k in draft.data)) draft.data[k] = v;
-    return draft.data;
-  };
+  const stateOf = (m) => ensureState(draft.data, m);
 
-  let text = '', lines = [];
+  let lines = [];
   const lang = getLang();
-  const T = (ca, es) => (lang === 'es' ? es : ca);
 
   const modeTabs = h('div', { class: 'chips mode-tabs', 'data-group': '_mode' });
   const form = h('div', { class: 'editor-form' });
@@ -29,11 +22,8 @@ export function Editor(unitId, template) {
   const copyBtn = h('button', { type: 'button', class: 'btn-primary btn-copy' }, t('editor.copy'));
 
   function updatePreview() {
-    const m = modeOf(), s = stateOf(m);
-    const G = (masc, fem, both) => (s.sex === 'h' ? masc : s.sex === 'd' ? fem : both);
-    // Capçalera obligatòria a tots els HD: nom de la unitat a dalt de tot.
-    text = `${t(`units.${unitId}`).toUpperCase()}\n\n${m.render(s, T, G).trim()}`;
-    lines = text.split('\n').map((line, i) => ({ text: line, bold: i === 0 || HEADING.test(line) }));
+    const m = modeOf();
+    ({ lines } = buildCourse({ unitName: t(`units.${unitId}`), mode: m, state: stateOf(m), lang }));
     preview.replaceChildren(...lines.map((l, i) => h('div', {
       class: i === 0 ? 'pv-title' : l.bold ? 'pv-heading' : l.text ? 'pv-line' : 'pv-gap' }, l.text)));
   }

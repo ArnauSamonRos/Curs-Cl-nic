@@ -4,18 +4,12 @@
 // només surt al text el que s'omple o es marca.
 import { L } from '../i18n/index.js';
 import { nowHHMM, addMinutes } from '../core/time.js';
-import { formatVitals, joinList } from '../core/fields.js';
+import { formatVitals, joinList } from '../core/text.js';
+import { o, pick, lbl, hhmm, lines, bullets, SEX, SIDE, noShowMode } from './kit.js';
 
-const o = (id, ca, es) => ({ id, label: L(ca, es) });
-const pick = (opts, ids = []) => opts.filter((x) => ids.includes(x.id));
-const lbl = (x, T) => T(x.label.ca, x.label.es);
-const hhmm = (v) => v || '__:__';
-const lines = (txt) => (txt || '').split('\n').map((l) => l.trim()).filter(Boolean);
-const bullets = (txt) => lines(txt).map((l) => (/^[-*•]/.test(l) ? l.replace(/^[-*•]\s*/, '- ') : '- ' + l));
 
 // ---------- Opcions ----------
 const VISIT = [o('prog', 'Programada', 'Programada'), o('imp', 'Imprevista', 'Imprevista'), o('noprog', 'No programada', 'No programada')];
-const SEX = [o('h', 'Home', 'Hombre'), o('d', 'Dona', 'Mujer')];
 const MEALS = [
   ['mEsm', L('Esmorzar', 'Desayuno')], ['mMig', L('Mig matí', 'Media mañana')], ['mDin', L('Dinar', 'Comida')],
   ['mBer', L('Berenar', 'Merienda')], ['mSop', L('Sopar', 'Cena')], ['mRes', L('Ressopó', 'Recena')],
@@ -60,7 +54,6 @@ const PLAN = [
   o('telef', 'Seguiment telefònic', 'Seguimiento telefónico'), o('nomes', 'No donem més visites d’infermeria', 'No damos más visitas de enfermería'),
   o('medavui', 'Visita avui amb l’equip mèdic', 'Visita hoy con el equipo médico'),
 ];
-const SIDE = [o('esd', 'ESD', 'ESD'), o('ese', 'ESE', 'ESI')];
 const ACUTE_ACT = [
   o('med', 'Valorat/da per l’equip mèdic', 'Valorado/a por el equipo médico'), o('as', 'Analítica (AS)', 'Analítica (AS)'),
   o('vvp', 'Col·locació de VVP', 'Colocación de VVP'), o('insul', 'Insulina SC segons indicació mèdica', 'Insulina SC según indicación médica'),
@@ -353,15 +346,6 @@ const ev = {
   },
 };
 
-// ---------- Mode: no acut ----------
-const noShow = {
-  id: 'noacut',
-  label: L('No acut', 'No acude'),
-  init: () => ({ visit: 'prog', noShowNote: '' }),
-  sections: [{ title: L('No acut', 'No acude'), fields: [{ type: 'text', id: 'noShowNote', wide: true, label: L('Motiu (opcional)', 'Motivo (opcional)') }] }],
-  render(s, T) {
-    return T("No acut a la visita programada a l'HD Endocrí", 'No acude a la visita programada en el HD Endocrino') + (s.noShowNote ? ` (${s.noShowNote})` : '') + '.';
-  },
-};
+const noShow = noShowMode(["No acut a la visita programada a l'HD Endocrí", 'No acude a la visita programada en el HD Endocrino']);
 
 export default { modes: [educacio, aguda, ev, noShow] };

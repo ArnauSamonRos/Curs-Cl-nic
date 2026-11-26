@@ -4,9 +4,10 @@ import es from './es.js';
 
 export const LANGS = { ca, es };
 const KEY = 'lang';
+const hasDOM = typeof document !== 'undefined';
 let lang = (() => { try { return localStorage.getItem(KEY); } catch { return null; } })();
 if (!LANGS[lang]) lang = 'ca';
-document.documentElement.lang = lang;
+if (hasDOM) document.documentElement.lang = lang;
 
 const listeners = new Set();
 export const getLang = () => lang;
@@ -14,7 +15,7 @@ export const onLangChange = (fn) => listeners.add(fn);
 export function setLang(l) {
   if (!LANGS[l] || l === lang) return;
   lang = l;
-  document.documentElement.lang = l;
+  if (hasDOM) document.documentElement.lang = l;
   try { localStorage.setItem(KEY, l); } catch {}
   listeners.forEach((fn) => fn(l));
 }

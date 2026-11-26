@@ -1,12 +1,9 @@
 // Plantilla de curs clínic: HD Geriatria (valoració geriàtrica).
 // Les escales s'interpreten soles a partir de la puntuació (Barthel, Lawton i Brody, MNA, Pfeiffer) i l'IMC es calcula del pes i la talla.
 import { L } from '../i18n/index.js';
-import { joinList } from '../core/fields.js';
+import { joinList } from '../core/text.js';
+import { o, pick, lbl, num, SEX, noShowMode } from './kit.js';
 
-const o = (id, ca, es) => ({ id, label: L(ca, es) });
-const pick = (opts, ids = []) => opts.filter((x) => ids.includes(x.id));
-const lbl = (x, T) => T(x.label.ca, x.label.es);
-const num = (v) => { const n = parseFloat(String(v).replace(',', '.')); return Number.isFinite(n) ? n : null; };
 
 // ---------- Interpretació d'escales ----------
 const barthel = (n, sex) => (n >= 100 ? (sex === 'd' ? ['autònoma', 'autónoma'] : sex === 'h' ? ['autònom', 'autónomo'] : ['autònom/a', 'autónomo/a']) : n >= 91 ? ['dependència escassa', 'dependencia escasa']
@@ -27,7 +24,6 @@ const mmse = (n) => (n >= 24 ? ['normal', 'normal'] : n >= 19 ? ['deteriorament 
   : n >= 14 ? ['deteriorament cognitiu moderat', 'deterioro cognitivo moderado'] : ['deteriorament cognitiu greu', 'deterioro cognitivo grave']);
 
 // ---------- Opcions ----------
-const SEX = [o('h', 'Home', 'Hombre'), o('d', 'Dona', 'Mujer')];
 const REASON = [
   o('cog', 'Valoració de deteriorament cognitiu', 'Valoración de deterioro cognitivo'),
   o('vgi', 'Valoració geriàtrica integral', 'Valoración geriátrica integral'),
@@ -189,14 +185,6 @@ function imc(s) {
   return w && h ? (w / (h / 100) ** 2).toFixed(1).replace('.', ',') : null;
 }
 
-const noShow = {
-  id: 'noacut',
-  label: L('No acut', 'No acude'),
-  init: () => ({ noShowNote: '' }),
-  sections: [{ title: L('No acut', 'No acude'), fields: [{ type: 'text', id: 'noShowNote', wide: true, label: L('Detall (opcional)', 'Detalle (opcional)') }] }],
-  render(s, T) {
-    return T('No acut a la visita programada de Geriatria', 'No acude a la visita programada de Geriatría') + (s.noShowNote ? ` (${s.noShowNote})` : '') + '.';
-  },
-};
+const noShow = noShowMode(['No acut a la visita programada de Geriatria', 'No acude a la visita programada de Geriatría']);
 
 export default { modes: [valoracio, noShow] };

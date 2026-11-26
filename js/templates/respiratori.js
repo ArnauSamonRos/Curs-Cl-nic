@@ -3,13 +3,11 @@
 // T(ca, es) tria idioma de sortida; G(masc, fem, neutre) segons el sexe seleccionat.
 import { L } from '../i18n/index.js';
 import { nowHHMM } from '../core/time.js';
-import { formatVitals, joinList } from '../core/fields.js';
+import { formatVitals, joinList } from '../core/text.js';
+import { o, pick, SEX, phrases } from './kit.js';
 
-const o = (id, ca, es, out) => ({ id, label: L(ca, es), out });
-const pick = (opts, ids = []) => opts.filter((x) => ids.includes(x.id));
 
 // ---------- Opcions ----------
-const SEX = [o('h', 'Home', 'Hombre'), o('d', 'Dona', 'Mujer')];
 
 const REASONS = [
   o('dispnea', 'Dispnea', 'Disnea'),
@@ -97,8 +95,7 @@ function renderInitial(s, T, G, { gasoAir }) {
   out.push('', T('VALORACIÓ INICIAL:', 'VALORACIÓN INICIAL:'));
   const v0 = formatVitals(s.v0, T);
   if (v0) out.push(v0);
-  if (s.stable) out.push(T(`Està conscient, ${G('orientat', 'orientada', 'orientat/da')} i hemodinàmicament estable.`,
-    `Está consciente, ${G('orientado', 'orientada', 'orientado/a')} y hemodinámicamente estable.`));
+  if (s.stable) out.push(phrases.stable(T, G));
   if (s.obs) out.push(s.obs);
 
   const lines = pick(INTERVENTIONS, s.interventions).map((i) => {

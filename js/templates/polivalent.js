@@ -3,13 +3,10 @@
 // els passos específics per tractament es poden afegir a la taula de tractaments.
 import { L } from '../i18n/index.js';
 import { nowHHMM, addMinutes } from '../core/time.js';
-import { formatVitals, joinList } from '../core/fields.js';
+import { formatVitals, joinList } from '../core/text.js';
 import { TREATMENTS, getTreatment } from '../data/treatments.js';
+import { o, pick, lbl, hhmm, SEX, SIDE, phrases } from './kit.js';
 
-const o = (id, ca, es) => ({ id, label: L(ca, es) });
-const pick = (opts, ids = []) => opts.filter((x) => ids.includes(x.id));
-const lbl = (x, T) => T(x.label.ca, x.label.es);
-const hhmm = (v) => v || '__:__';
 
 const TTOS = TREATMENTS.filter((x) => x.kind === 'tto');
 const PROCS = TREATMENTS.filter((x) => x.kind === 'proc');
@@ -39,7 +36,6 @@ const PREP = [
 ];
 const COMPANY = [o('si', 'Acompanyat/da', 'Acompañado/a'), o('no', 'Sol/a', 'Solo/a')];
 const INCIDENTS = [o('no', 'Sense incidències', 'Sin incidencias'), o('si', 'Amb incidències', 'Con incidencias')];
-const SEX = [o('h', 'Home', 'Hombre'), o('d', 'Dona', 'Mujer')];
 const VITALS_SHOW = ['ta', 'fc', 'temp'];
 const POST = [
   o('oral', 'Tolerància oral', 'Tolerancia oral'),
@@ -81,8 +77,7 @@ function head(s, T, G, what) {
   const v0 = formatVitals(s.v0, T);
   out.push('', T('VALORACIÓ INICIAL:', 'VALORACIÓN INICIAL:'));
   if (v0) out.push(v0);
-  if (s.stable) out.push(T(`Està conscient, ${G('orientat', 'orientada', 'orientat/da')} i hemodinàmicament estable.`,
-    `Está consciente, ${G('orientado', 'orientada', 'orientado/a')} y hemodinámicamente estable.`));
+  if (s.stable) out.push(phrases.stable(T, G));
   return out;
 }
 function accessLine(s, T) {
@@ -162,7 +157,6 @@ const tractament = {
 
 // ---------- Proves: CC abans, després o complet ----------
 const PHASE = [o('pre', 'Abans de la prova', 'Antes de la prueba'), o('post', 'Després de la prova', 'Después de la prueba'), o('all', 'Complet', 'Completo')];
-const SIDE = [o('esd', 'ESD', 'ESD'), o('ese', 'ESE', 'ESI')];
 const LEAVE = [
   o('peu', 'Caminant', 'Caminando'),
   o('cadira', 'Cadira de rodes', 'Silla de ruedas'),
@@ -211,8 +205,8 @@ const prova = {
   render(s, T, G) {
     const p = getTreatment(s.proc);
     const name = p ? lbl(p, T).toLowerCase() : '___';
-    const comp = s.company === 'si' ? T(G('acompanyat', 'acompanyada', 'acompanyat/da'), G('acompañado', 'acompañada', 'acompañado/a'))
-      : s.company === 'no' ? T(G('sol', 'sola', 'sol/a'), G('solo', 'sola', 'solo/a')) : '';
+    const comp = s.company === 'si' ? phrases.accompanied(T, G)
+      : s.company === 'no' ? phrases.alone(T, G) : '';
     const out = [];
 
     if (hasPre(s)) {
@@ -222,8 +216,7 @@ const prova = {
       out.push('', T('VALORACIÓ INICIAL:', 'VALORACIÓN INICIAL:'));
       const v0 = formatVitals(s.v0, T);
       if (v0) out.push(v0);
-      if (s.stable) out.push(T(`Està conscient, ${G('orientat', 'orientada', 'orientat/da')} i hemodinàmicament estable.`,
-        `Está consciente, ${G('orientado', 'orientada', 'orientado/a')} y hemodinámicamente estable.`));
+      if (s.stable) out.push(phrases.stable(T, G));
       const items = pick(PREP, s.prep).map((x) => lbl(x, T));
       if (s.procVvp) {
         const side = pick(SIDE, [s.side])[0];

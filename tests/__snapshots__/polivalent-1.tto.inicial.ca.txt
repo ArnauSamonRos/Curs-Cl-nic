@@ -1,0 +1,15 @@
+HD POLIVALENT-1
+
+A les 09:00 hores, acudeix a l'Hospital de Dia per a l’administració de ___.
+
+VALORACIÓ INICIAL:
+Està conscient, orientat/da i hemodinàmicament estable.
+
+INTERVENCIÓ:
+- Canalització de via perifèrica 22G
+- Administració de ___.
+- Sense incidències.
+
+SEGUIMENT:
+Es retira via perifèrica sense incidències.
+A les __:__ hores, alta.

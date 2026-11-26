@@ -1,0 +1,18 @@
+HD VACUNACIO
+
+Paciente que acude al HD derivado de Reumatología para iniciar vacunación.
+
+Explico pauta de vacunación + posibles EA + cómo aliviarlos. Acepta.
+
+ADMINISTRO:
+- 1ª dosis Haemophilus influenzae b: Hiberix
+- 1ª dosis Pneumo: Pn 21
+Sin incidencias inmediatas.
+
+Entrego carnet vacunal y registro en apartado correspondiente.
+
+PLAN:
+- Programo para 1ª dosis Mng ACWY + 1ª dosis VHA + 1ª dosis VHB + 1ª dosis Papiloma + 1ª dosis VHZ + 1ª dosis Mng B para dentro de 1 mes.
+- Programo para 2ª dosis VHB + 2ª dosis Mng B para dentro de 2 meses.
+- Programo para 2ª dosis Mng ACWY + 3ª dosis VHB + 2ª dosis Papiloma + 2ª dosis VHZ para dentro de 3 meses.
+- Programo para 2ª dosis VHA + 4ª dosis VHB + 3ª dosis Papiloma para dentro de 7 meses.

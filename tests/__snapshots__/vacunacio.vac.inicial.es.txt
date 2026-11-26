@@ -1,0 +1,16 @@
+HD VACUNACIO
+
+Paciente que acude al HD derivado de Oncología para iniciar vacunación.
+
+Explico pauta de vacunación + posibles EA + cómo aliviarlos. Acepta.
+
+ADMINISTRO:
+- 1ª dosis Pneumo: Pn 21
+- 1ª dosis VHZ: Shingrix
+- 1ª dosis dTpa: Boostrix
+Sin incidencias inmediatas.
+
+Entrego carnet vacunal y registro en apartado correspondiente.
+
+PLAN:
+- Programo para 2ª dosis VHZ para dentro de 2 meses.

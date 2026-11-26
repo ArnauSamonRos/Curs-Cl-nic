@@ -1,0 +1,12 @@
+{
+  "name": "curs-clinic",
+  "private": true,
+  "type": "module",
+  "description": "Generador de cursos clínics per als Hospitals de Dia (web estàtica, sense dependències).",
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "test:update": "UPDATE_SNAPSHOTS=1 node --test tests/*.test.js",
+    "start": "python3 -m http.server 8000"
+  },
+  "engines": { "node": ">=20" }
+}
