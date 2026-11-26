@@ -54,26 +54,22 @@ const vacunes = {
   id: 'vac',
   label: L('Vacunació', 'Vacunación'),
   init: () => {
-    const s = { program: 'onco', month: 0, vaccines: [...PROGRAMS.onco.preset], given: [], age: '', from: PROGRAMS.onco.from, fromOther: '', context: '',
+    const s = { program: 'onco', month: 0, vaccines: [...PROGRAMS.onco.preset], given: [], age: '', context: '',
       explained: true, incid: 'no', incidText: '', carnet: true, fullPlan: false, extra: '' };
     recompute(s);
     return s;
   },
   sections: [
-    { title: L('Programa', 'Programa'), fields: [
-      { type: 'chips', id: 'program', required: true, wide: true, label: L('Carnet', 'Carnet'), options: programOptions,
-        onSet: (s) => { s.vaccines = [...program(s).preset]; s.month = 0; s.from = program(s).from ?? s.from; recompute(s); } },
+    { title: L('Pacient i programa', 'Paciente y programa'), fields: [
+      { type: 'chips', id: 'program', required: true, wide: true, label: L('Derivat/da de', 'Derivado/a de'), options: programOptions,
+        onSet: (s) => { s.vaccines = [...program(s).preset]; s.month = 0; recompute(s); } },
       { type: 'note', id: 'pnote', wide: true, text: (s) => program(s)?.note },
       { type: 'chips', id: 'vaccines', multi: true, wide: true, label: L('Vacunes del programa', 'Vacunas del programa'),
         options: (s) => Object.keys(sched(s)).map((v) => ({ id: v, label: L(nm(VACCINES[v].name).ca + warn(v), nm(VACCINES[v].name).es + warn(v)) })),
         onSet: recompute },
       { type: 'chips', id: 'month', required: true, wide: true, label: L('Visita d’avui', 'Visita de hoy'),
         options: (s) => visitMonths(s).map((m) => ({ id: m, label: monthLabel(m) })), onSet: recompute },
-    ] },
-    { title: L('Pacient', 'Paciente'), fields: [
       { type: 'number', id: 'age', label: L('Edat', 'Edad'), unit: L('anys', 'años') },
-      { type: 'chips', id: 'from', wide: true, label: L('Derivat/da de', 'Derivado/a de'), options: FROM },
-      { type: 'text', id: 'fromOther', label: L('Altre servei', 'Otro servicio') },
       { type: 'text', id: 'context', wide: true, label: L('Context (opcional)', 'Contexto (opcional)'), placeholder: L('Post TASPE: 21/11/24', 'Post TASPE: 21/11/24') },
     ] },
     { title: L('Administro avui', 'Administro hoy'), fields: [
@@ -95,7 +91,8 @@ const vacunes = {
     ] },
   ],
   render(s, T) {
-    const from = s.fromOther || (FROM.find((x) => x.id === s.from) && T(...Object.values(FROM.find((x) => x.id === s.from).label)));
+    const f = FROM.find((x) => x.id === program(s)?.from);
+    const from = f && T(f.label.ca, f.label.es);
     const out = [];
     let p = T('Pacient', 'Paciente') + (s.age ? T(` de ${s.age} anys`, ` de ${s.age} años`) : '')
       + T(" que acut a l'HD", ' que acude al HD');
