@@ -13,7 +13,7 @@ const isPneumo = (id) => id === 'pn20' || id === 'pn21';
 const FROM = [
   o('hemato', 'Hematologia', 'Hematología'), o('reuma', 'Reumatologia', 'Reumatología'), o('digest', 'Digestiu', 'Digestivo'),
   o('derma', 'Dermatologia', 'Dermatología'), o('neuro', 'Neurologia', 'Neurología'), o('nefro', 'Nefrologia', 'Nefrología'),
-  o('onco', 'Oncologia', 'Oncología'), o('infec', 'Infeccioses', 'Infecciosas'), o('tx', 'Unitat de trasplantament', 'Unidad de trasplante'),
+  o('onco', 'Oncologia', 'Oncología'), o('cexinf', 'CEX Infeccioses', 'CEX Infecciosas'), o('tx', 'Unitat de trasplantament', 'Unidad de trasplante'),
 ];
 const INCID = [o('no', 'Sense incidències', 'Sin incidencias'), o('si', 'Amb incidències', 'Con incidencias')];
 
@@ -54,7 +54,7 @@ const vacunes = {
   id: 'vac',
   label: L('Vacunació', 'Vacunación'),
   init: () => {
-    const s = { program: 'bio', month: 0, vaccines: [...PROGRAMS.bio.preset], given: [], age: '', from: null, fromOther: '', context: '',
+    const s = { program: 'onco', month: 0, vaccines: [...PROGRAMS.onco.preset], given: [], age: '', from: PROGRAMS.onco.from, fromOther: '', context: '',
       explained: true, incid: 'no', incidText: '', carnet: true, fullPlan: false, extra: '' };
     recompute(s);
     return s;
@@ -62,7 +62,7 @@ const vacunes = {
   sections: [
     { title: L('Programa', 'Programa'), fields: [
       { type: 'chips', id: 'program', required: true, wide: true, label: L('Carnet', 'Carnet'), options: programOptions,
-        onSet: (s) => { s.vaccines = [...program(s).preset]; s.month = 0; recompute(s); } },
+        onSet: (s) => { s.vaccines = [...program(s).preset]; s.month = 0; s.from = program(s).from ?? s.from; recompute(s); } },
       { type: 'note', id: 'pnote', wide: true, text: (s) => program(s)?.note },
       { type: 'chips', id: 'vaccines', multi: true, wide: true, label: L('Vacunes del programa', 'Vacunas del programa'),
         options: (s) => Object.keys(sched(s)).map((v) => ({ id: v, label: L(nm(VACCINES[v].name).ca + warn(v), nm(VACCINES[v].name).es + warn(v)) })),
