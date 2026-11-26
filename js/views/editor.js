@@ -6,6 +6,9 @@ import { getDraft, resetDraft } from '../core/store.js';
 import { t, tr, getLang } from '../i18n/index.js';
 import { attachKeyNav, focusKey, restoreFocus, focusFirst } from '../core/keynav.js';
 
+// Línia de títol de secció: "SEGUIMENT:", "VALORACIÓ INICIAL:"…
+const HEADING = /^[A-ZÀ-ÜÇ' ]+:$/;
+
 export function Editor(unitId, template) {
   const key = 'cc:' + unitId;
   const draft = getDraft(key, () => ({ mode: template.modes[0].id, data: {} }));
@@ -16,18 +19,22 @@ export function Editor(unitId, template) {
     return draft.data;
   };
 
+  let text = '';
   const lang = getLang();
   const T = (ca, es) => (lang === 'es' ? es : ca);
 
   const modeTabs = h('div', { class: 'chips mode-tabs', 'data-group': '_mode' });
   const form = h('div', { class: 'editor-form' });
-  const preview = h('pre', { class: 'preview', 'aria-live': 'polite' });
+  const preview = h('div', { class: 'preview', 'aria-live': 'polite' });
   const copyBtn = h('button', { type: 'button', class: 'btn-primary btn-copy' }, t('editor.copy'));
 
   function updatePreview() {
     const m = modeOf(), s = stateOf(m);
     const G = (masc, fem, both) => (s.sex === 'h' ? masc : s.sex === 'd' ? fem : both);
-    preview.textContent = m.render(s, T, G);
+    // Capçalera obligatòria a tots els HD: nom de la unitat a dalt de tot.
+    text = `${t(`units.${unitId}`).toUpperCase()}\n\n${m.render(s, T, G).trim()}`;
+    preview.replaceChildren(...text.split('\n').map((line, i) => h('div', {
+      class: i === 0 ? 'pv-title' : HEADING.test(line) ? 'pv-heading' : line ? 'pv-line' : 'pv-gap' }, line)));
   }
 
   function renderForm() {
@@ -49,7 +56,7 @@ export function Editor(unitId, template) {
   }
 
   copyBtn.addEventListener('click', async () => {
-    const ok = await copyText(preview.textContent);
+    const ok = await copyText(text);
     copyBtn.textContent = ok ? t('editor.copied') : t('editor.copyError');
     copyBtn.classList.toggle('done', ok);
     setTimeout(() => { copyBtn.textContent = t('editor.copy'); copyBtn.classList.remove('done'); }, 1500);

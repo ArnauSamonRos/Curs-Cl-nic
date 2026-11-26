@@ -94,7 +94,9 @@ function renderInitial(s, T, G, { gasoAir }) {
   const out = [];
   out.push(T(`A les ${s.time || '__:__'} hores, acudeix a l'HDR`, `A las ${s.time || '__:__'} horas, acude al HDR`)
     + (reasons.length ? T(' per ', ' por ') + joinList(reasons, T) : '') + '.');
-  out.push(T('VALORACIÓ INICIAL: ', 'VALORACIÓN INICIAL: ') + formatVitals(s.v0, T));
+  out.push('', T('VALORACIÓ INICIAL:', 'VALORACIÓN INICIAL:'));
+  const v0 = formatVitals(s.v0, T);
+  if (v0) out.push(v0);
   if (s.stable) out.push(T(`Està conscient, ${G('orientat', 'orientada', 'orientat/da')} i hemodinàmicament estable.`,
     `Está consciente, ${G('orientado', 'orientada', 'orientado/a')} y hemodinámicamente estable.`));
   if (s.obs) out.push(s.obs);
@@ -113,7 +115,7 @@ function renderInitial(s, T, G, { gasoAir }) {
     }
   });
   if (s.intOther) lines.push(s.intOther);
-  if (lines.length) out.push(T('INTERVENCIÓ:', 'INTERVENCIÓN:'), ...lines.map((l) => '- ' + l));
+  if (lines.length) out.push('', T('INTERVENCIÓ:', 'INTERVENCIÓN:'), ...lines.map((l) => '- ' + l));
   return out;
 }
 
@@ -146,7 +148,7 @@ const general = {
       cex: T('control a CEX', 'control en CEX'),
       tel: T('control telefònic', 'control telefónico'),
     }[s.followup];
-    out.push(T('SEGUIMENT:', 'SEGUIMIENTO:'));
+    out.push('', T('SEGUIMENT:', 'SEGUIMIENTO:'));
     out.push(T(`A les ${s.dischargeTime || '__:__'} hores, alta`, `A las ${s.dischargeTime || '__:__'} horas, alta`)
       + (fu ? T(' i ', ' y ') + fu : '') + '.');
     if (s.unplanned) out.push('', T(
@@ -184,11 +186,13 @@ const ingres = {
   ],
   render(s, T, G) {
     const out = renderInitial(s, T, G, { gasoAir: false });
-    out.push(T('SEGUIMENT:', 'SEGUIMIENTO:'));
+    out.push('', T('SEGUIMENT:', 'SEGUIMIENTO:'));
     out.push(T(`Es decideix ingrés hospitalari per ${s.admitReason || '___'}.`, `Se decide ingreso hospitalario por ${s.admitReason || '___'}.`));
     if (s.fullAtencio) out.push(T('Fet "full d’atenció a l’usuari de l’hospital" com a seguiment d’infermeria.',
       'Realizada "hoja de atención al usuario del hospital" como seguimiento de enfermería.'));
-    out.push(T('VALORACIÓ FINAL: ', 'VALORACIÓN FINAL: ') + formatVitals(s.v1, T));
+    out.push('', T('VALORACIÓ FINAL:', 'VALORACIÓN FINAL:'));
+    const v1 = formatVitals(s.v1, T);
+    if (v1) out.push(v1);
     out.push(s.transfer === 'pv1'
       ? T('Trasllat al Polivalent 1 en espera de llit lliure a la sala.', 'Traslado al Polivalente 1 en espera de cama libre en la sala.')
       : T(`Trasllat a sala ${s.ward || '___'} per ingrés a les ${s.transferTime || '__:__'} hores.`,
