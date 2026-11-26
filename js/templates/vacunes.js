@@ -30,6 +30,8 @@ const recompute = (s) => { s.given = dosesAt(s, s.month).map((d) => d.key); };
 function planGroups(s) {
   const future = chosen(s).flatMap((vac) => sched(s)[vac].map((off, i) => ({ vac, i, off }))).filter((d) => d.off > s.month);
   const missed = dosesAt(s, s.month).filter((d) => !s.given.includes(d.key));
+  // Vacunes afegides des del PLA: la seva 1a dosi va a la propera visita.
+  missed.push(...(s.addNext ?? []).filter((v) => !chosen(s).includes(v)).map((vac) => ({ vac, i: 0 })));
   const groups = new Map();
   for (const d of future) { if (!groups.has(d.off)) groups.set(d.off, []); groups.get(d.off).push(d); }
   const offs = [...groups.keys()].sort((a, b) => a - b);
@@ -55,14 +57,14 @@ const vacunes = {
   label: L('Vacunació', 'Vacunación'),
   init: () => {
     const s = { program: 'onco', month: 0, vaccines: [...PROGRAMS.onco.preset], given: [], age: '', context: '',
-      explained: true, incid: 'no', incidText: '', carnet: true, fullPlan: false, extra: '' };
+      explained: true, incid: 'no', incidText: '', carnet: true, fullPlan: false, addNext: [], extra: '' };
     recompute(s);
     return s;
   },
   sections: [
     { title: L('Pacient i programa', 'Paciente y programa'), fields: [
       { type: 'chips', id: 'program', required: true, wide: true, label: L('Derivat/da de', 'Derivado/a de'), options: programOptions,
-        onSet: (s) => { s.vaccines = [...program(s).preset]; s.month = 0; recompute(s); } },
+        onSet: (s) => { s.vaccines = [...program(s).preset]; s.month = 0; s.addNext = []; recompute(s); } },
       { type: 'note', id: 'pnote', wide: true, text: (s) => program(s)?.note },
       { type: 'chips', id: 'vaccines', multi: true, wide: true, label: L('Vacunes del programa', 'Vacunas del programa'),
         options: (s) => Object.keys(sched(s)).map((v) => ({ id: v, label: L(nm(VACCINES[v].name).ca + warn(v), nm(VACCINES[v].name).es + warn(v)) })),
@@ -87,6 +89,8 @@ const vacunes = {
           `Próxima visita dentro de ${g.off - s.month === 1 ? '1 mes' : `${g.off - s.month} meses`} (${addMonthsFmt(Date.now(), g.off - s.month)})`)
           : L('Programa completat: no queden dosis', 'Programa completado: no quedan dosis');
       } },
+      { type: 'chips', id: 'addNext', multi: true, wide: true, label: L('Afegir a la propera visita', 'Añadir a la próxima visita'),
+        options: (s) => Object.keys(VACCINES).filter((v) => !chosen(s).includes(v)).map((v) => ({ id: v, label: L(nm(VACCINES[v].name).ca + (isPneumo(v) ? ` (${VACCINES[v].brand})` : '') + warn(v), nm(VACCINES[v].name).es + (isPneumo(v) ? ` (${VACCINES[v].brand})` : '') + warn(v)) })) },
       { type: 'toggle', id: 'fullPlan', text: L('Mostrar tot el calendari pendent', 'Mostrar todo el calendario pendiente') },
     ] },
   ],
