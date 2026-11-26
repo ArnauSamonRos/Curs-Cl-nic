@@ -1,0 +1,16 @@
+export default {
+  'app.title': 'Curs Clínic',
+  'tab.units': '1. Hospitals de Dia',
+  'home.title': "Selecciona l'Hospital de Dia",
+  'unit.notFound': 'Unitat no trobada',
+  'unit.course': 'Curs clínic',
+  'unit.soon': 'Pròximament: plantilla de curs clínic',
+  'units.respiratori': 'HD Respiratori',
+  'units.infeccioses': 'HD Infeccioses',
+  'units.polivalent-1': 'HD Polivalent 1',
+  'units.polivalent-2': 'HD Polivalent 2',
+  'units.endocrino': 'HD Endocrinologia',
+  'units.vacunacio': 'HD Vacunació',
+  'units.geriatria': 'HD Geriatria',
+  'units.uic': 'UIC',
+};

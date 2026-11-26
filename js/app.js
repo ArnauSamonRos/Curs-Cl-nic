@@ -1,5 +1,6 @@
-import { route, start } from './core/router.js';
+import { route, start, refresh } from './core/router.js';
 import { h } from './core/dom.js';
+import { t, getLang, setLang, onLangChange, LANGS } from './i18n/index.js';
 import { HomeView } from './views/home.js';
 import { UnitView } from './views/unit.js';
 
@@ -7,8 +8,18 @@ route('/', HomeView);
 route('/unit/:id', UnitView);
 
 const tabs = document.getElementById('tabs');
-start(document.getElementById('app'), (path) => {
+const brand = document.querySelector('.brand');
+const langSwitch = document.getElementById('lang');
+
+function renderChrome(path) {
+  document.title = t('app.title');
+  brand.textContent = t('app.title');
   tabs.replaceChildren(
-    h('a', { class: 'tab' + (path === '/' ? ' active' : ''), href: '#/' }, '1. Hospitals de Dia'),
+    h('a', { class: 'tab' + (path === '/' ? ' active' : ''), href: '#/' }, t('tab.units')),
   );
-});
+  langSwitch.replaceChildren(...Object.keys(LANGS).map((l) =>
+    h('button', { class: 'lang-btn' + (l === getLang() ? ' active' : ''), 'aria-pressed': String(l === getLang()), onclick: () => setLang(l) }, l.toUpperCase())));
+}
+
+onLangChange(refresh);
+start(document.getElementById('app'), renderChrome);

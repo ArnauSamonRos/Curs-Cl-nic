@@ -1,0 +1,16 @@
+export default {
+  'app.title': 'Curso Clínico',
+  'tab.units': '1. Hospitales de Día',
+  'home.title': 'Selecciona el Hospital de Día',
+  'unit.notFound': 'Unidad no encontrada',
+  'unit.course': 'Curso clínico',
+  'unit.soon': 'Próximamente: plantilla de curso clínico',
+  'units.respiratori': 'HD Respiratorio',
+  'units.infeccioses': 'HD Infecciosas',
+  'units.polivalent-1': 'HD Polivalente 1',
+  'units.polivalent-2': 'HD Polivalente 2',
+  'units.endocrino': 'HD Endocrinología',
+  'units.vacunacio': 'HD Vacunación',
+  'units.geriatria': 'HD Geriatría',
+  'units.uic': 'UIC',
+};

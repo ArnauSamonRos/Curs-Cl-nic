@@ -1,4 +1,6 @@
 // Router per hash: funciona en qualsevol servidor estàtic (o obrint des d'una carpeta compartida).
+let rerender = () => {};
+export const refresh = () => rerender();
 const routes = [];
 export function route(pattern, view) {
   const keys = [];
@@ -20,6 +22,7 @@ export function start(mount, onChange) {
     }
     navigate('/');
   };
-  addEventListener('hashchange', render);
+  addEventListener("hashchange", render);
+  rerender = render;
   render();
 }
