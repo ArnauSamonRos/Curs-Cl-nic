@@ -61,7 +61,8 @@ const F = {
   gauge: { type: 'chips', id: 'gauge', label: L('Calibre', 'Calibre'), options: GAUGE, when: (s) => s.access === 'vvp' },
   site: { type: 'chips', id: 'site', label: L('Localització', 'Localización'), options: SITE, wide: true, when: (s) => s.access === 'vvp' },
   lab: { type: 'toggle', id: 'lab', text: L('Extracció d’analítica', 'Extracción de analítica') },
-  v1: { type: 'vitals', id: 'v1', wide: true, show: VITALS_SHOW },
+  finalOn: { type: 'toggle', id: 'finalOn', text: L('Valoració final (constants)', 'Valoración final (constantes)') },
+  v1: { type: 'vitals', id: 'v1', wide: true, show: VITALS_SHOW, when: (s) => s.finalOn },
   dischargeTime: { type: 'time', id: 'dischargeTime', label: L('Hora d’alta', 'Hora de alta') },
   removeVvp: { type: 'toggle', id: 'removeVvp', text: L('Retirada de via perifèrica', 'Retirada de vía periférica'), when: (s) => s.access === 'vvp' },
   next: { type: 'text', id: 'next', wide: true, label: L('Propera visita', 'Próxima visita') },
@@ -71,7 +72,7 @@ const F = {
 const baseState = () => ({
   time: nowHHMM(), sex: null, company: null, incidents: 'no', incidentText: '', v0: { o2: 'aire' }, stable: true,
   access: 'vvp', gauge: '22', site: null, lab: false,
-  v1: { o2: 'aire' }, dischargeTime: '', removeVvp: true, next: '', obs: '',
+  finalOn: false, v1: { o2: 'aire' }, dischargeTime: '', removeVvp: true, next: '', obs: '',
 });
 
 // ---------- Text compartit ----------
@@ -100,12 +101,12 @@ function incidentLine(s, T) {
     : T('Sense incidències', 'Sin incidencias');
 }
 function tail(s, T, G) {
-  const out = ['', T('VALORACIÓ FINAL:', 'VALORACIÓN FINAL:')];
-  const v1 = formatVitals(s.v1, T);
-  if (v1) out.push(v1);
+  const out = [];
+  const v1 = s.finalOn ? formatVitals(s.v1, T) : '';
+  if (v1) out.push('', T('VALORACIÓ FINAL:', 'VALORACIÓN FINAL:'), v1);
+  out.push('', T('SEGUIMENT:', 'SEGUIMIENTO:'));
   if (s.access === 'vvp' && s.removeVvp) out.push(T('Es retira via perifèrica sense incidències.', 'Se retira vía periférica sin incidencias.'));
   if (s.obs) out.push(s.obs);
-  out.push('', T('SEGUIMENT:', 'SEGUIMIENTO:'));
   const comp = s.company === 'si' ? T(` ${G('acompanyat', 'acompanyada', 'acompanyat/da')}`, ` ${G('acompañado', 'acompañada', 'acompañado/a')}`)
     : s.company === 'no' ? T(` ${G('sol', 'sola', 'sol/a')}`, ` ${G('solo', 'sola', 'solo/a')}`) : '';
   out.push(T(`A les ${hhmm(s.dischargeTime)} hores, alta${comp}.`, `A las ${hhmm(s.dischargeTime)} horas, alta${comp}.`)
@@ -117,7 +118,7 @@ function tail(s, T, G) {
 const tractament = {
   id: 'tto',
   label: L('Tractament', 'Tratamiento'),
-  init: () => ({ ...baseState(), tto: null, dose: '', premed: [], start: '', durMin: '', end: '' }),
+  init: () => ({ ...baseState(), tto: null, dose: '', premedOn: false, premed: [], premedOther: '', start: '', durMin: '', end: '' }),
   sections: [
     { title: L('Tractament', 'Tratamiento'), fields: [
       // En triar el tractament, s'omple la durada prevista de l'organitzador de llits.
@@ -128,13 +129,15 @@ const tractament = {
     { title: L('Valoració inicial', 'Valoración inicial'), fields: [F.v0, F.stable] },
     { title: L('Administració', 'Administración'), fields: [
       F.access, F.gauge, F.site, F.lab,
-      { type: 'chips', id: 'premed', multi: true, wide: true, label: L('Premedicació', 'Premedicación'), options: PREMED },
+      { type: 'toggle', id: 'premedOn', text: L('Premedicació', 'Premedicación') },
+      { type: 'chips', id: 'premed', multi: true, wide: true, options: PREMED, when: (s) => s.premedOn },
+      { type: 'text', id: 'premedOther', wide: true, label: L('Altra premedicació', 'Otra premedicación'), when: (s) => s.premedOn },
       { type: 'time', id: 'start', label: L('Hora inici', 'Hora inicio') },
       { type: 'number', id: 'durMin', label: L('Durada', 'Duración'), unit: 'min' },
       { type: 'time', id: 'end', label: L('Hora final (buit = inici + durada)', 'Hora final (vacío = inicio + duración)') },
       F.incidents, F.incidentText,
     ] },
-    { title: L('Valoració final i alta', 'Valoración final y alta'), fields: [F.v1, F.removeVvp, F.dischargeTime, F.next, F.obs] },
+    { title: L('Alta', 'Alta'), fields: [F.finalOn, F.v1, F.removeVvp, F.dischargeTime, F.next, F.obs] },
   ],
   render(s, T, G) {
     const tto = getTreatment(s.tto);
@@ -142,7 +145,8 @@ const tractament = {
     const out = head(s, T, G, T(`per a l’administració de ${name}`, `para la administración de ${name}`));
     const items = [accessLine(s, T)];
     if (s.lab) items.push(T('Extracció d’analítica', 'Extracción de analítica'));
-    if (s.premed.length) items.push(T('Premedicació: ', 'Premedicación: ') + pick(PREMED, s.premed).map((x) => lbl(x, T)).join(', '));
+    const premed = s.premedOn ? [...pick(PREMED, s.premed).map((x) => lbl(x, T)), s.premedOther].filter(Boolean) : [];
+    if (premed.length) items.push(T('Premedicació: ', 'Premedicación: ') + premed.join(', ') + '.');
     items.push(T(`Administració de ${name}`, `Administración de ${name}`) + (s.dose ? ` ${s.dose}` : '') + '.');
     const end = s.end || addMinutes(s.start, s.durMin);
     const timing = [];
@@ -172,7 +176,7 @@ const prova = {
     { title: L('Post-prova', 'Post-prueba'), fields: [
       { type: 'chips', id: 'post', multi: true, wide: true, options: POST },
       F.incidents, F.incidentText,
-      F.v1, F.removeVvp, F.dischargeTime, F.next, F.obs,
+      F.finalOn, F.v1, F.removeVvp, F.dischargeTime, F.next, F.obs,
     ] },
   ],
   render(s, T, G) {
