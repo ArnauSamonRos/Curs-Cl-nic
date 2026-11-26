@@ -4,7 +4,7 @@
 //  Enter en un text: salta al camp següent. Espai/Enter en un botó: el marca.
 // Els grups es marquen amb [data-group]. Cap dependència de l'estructura de la plantilla.
 
-const CONTROLS = 'button:not([disabled]), input:not([disabled])';
+const CONTROLS = 'button:not([disabled]):not([hidden]), input:not([disabled])';
 
 const controls = (root) => [...root.querySelectorAll(CONTROLS)];
 const groupOf = (el) => el.closest('[data-group]');

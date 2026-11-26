@@ -24,4 +24,5 @@ export default {
   "editor.reset": "Nuevo paciente",
   "editor.resetConfirm": "¿Borrar todos los datos del formulario?",
   "editor.kbd": "←→ mover · ↑↓ campo · Espacio marcar · Enter siguiente · Ctrl+Enter copiar · Alt+1/2/3 modo · Alt+N nuevo",
+  "form.search": "Buscar…",
 };

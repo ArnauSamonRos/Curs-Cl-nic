@@ -43,6 +43,31 @@ const RENDERERS = {
       }));
   },
 
+  // Llista llarga amb cercador: escriure filtra les opcions sense repintar (no es perd el focus).
+  pick(f, s, onChange) {
+    const norm = (x) => x.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const chips = f.options.map((o) => {
+      const on = s[f.id] === o.id;
+      const el = h('button', { type: 'button', class: 'chip' + (on ? ' on' : ''), 'aria-pressed': String(on),
+        onclick: () => { s[f.id] = on ? null : o.id; onChange(true); } }, tr(o.label));
+      el._text = norm(tr(o.label));
+      return el;
+    });
+    const filter = h('input', { type: 'text', class: 'input', placeholder: t('form.search') });
+    filter.addEventListener('input', () => {
+      const q = norm(filter.value.trim());
+      chips.forEach((c) => { c.hidden = !!q && !c._text.includes(q); });
+    });
+    // Enter al cercador amb un sol resultat: el selecciona.
+    filter.addEventListener('keydown', (e) => {
+      const visible = chips.filter((c) => !c.hidden);
+      if (e.key === 'Enter' && visible.length === 1) { e.preventDefault(); e.stopPropagation(); visible[0].click();
+        // i salta al camp següent (el formulari ja s'ha repintat).
+        document.activeElement?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true })); }
+    });
+    return h('div', { class: 'pick' }, filter, h('div', { class: 'chips' }, chips));
+  },
+
   number(f, s, onChange) {
     return h('div', { class: 'row' },
       input({ type: 'text', inputmode: 'decimal', class: 'input input-num', placeholder: f.placeholder ?? '' },

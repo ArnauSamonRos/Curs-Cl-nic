@@ -77,3 +77,5 @@
 .pv-title { font-weight: 700; font-size: 15px; color: var(--c-primary); padding-bottom: 8px; border-bottom: 2px solid var(--c-primary-soft); margin-bottom: 4px; }
 .pv-heading { font-weight: 700; font-size: 12px; letter-spacing: .04em; color: var(--c-primary); margin-top: 2px; }
 .pv-gap { height: 10px; }
+.pick { display: flex; flex-direction: column; gap: 8px; }
+.pick .chips { max-height: 220px; overflow: auto; padding: 2px; }
