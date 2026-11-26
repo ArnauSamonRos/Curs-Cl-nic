@@ -9,7 +9,7 @@ export default {
   'units.infeccioses': 'HD Infeccioses',
   'units.polivalent-1': 'HD Polivalent 1',
   'units.polivalent-2': 'HD Polivalent 2',
-  'units.endocrino': 'HD Endocrinologia',
+  'units.endocrino': 'HD Endocrí',
   'units.vacunacio': 'HD Vacunació',
   'units.geriatria': 'HD Geriatria',
   'units.uic': 'UIC',
@@ -23,6 +23,6 @@ export default {
   "editor.copyError": "Error en copiar",
   "editor.reset": "Nou pacient",
   "editor.resetConfirm": "Esborrar totes les dades del formulari?",
-  "editor.kbd": "←→ moure · ↑↓ camp · Espai marcar · Enter següent · Ctrl+Enter copiar · Alt+1/2/3 mode · Alt+N nou",
+  "editor.kbd": "←→ moure · ↑↓ camp · Espai marcar · Enter següent · Ctrl+Enter copiar · Alt+1…4 pestanya · Alt+N nou",
   "form.search": "Cerca…",
 };

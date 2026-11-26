@@ -75,6 +75,14 @@ const RENDERERS = {
       f.unit ? h('span', { class: 'unit-suffix' }, tr(f.unit)) : null);
   },
 
+  // Diverses línies (Enter = línia nova). Cada línia pot sortir com a punt de llista.
+  textarea(f, s, onChange) {
+    const el = h('textarea', { class: 'input textarea', rows: String(f.rows ?? 3), placeholder: tr(f.placeholder) });
+    el.value = s[f.id] ?? '';
+    el.addEventListener('input', () => { s[f.id] = el.value; onChange(false); });
+    return el;
+  },
+
   text(f, s, onChange) {
     return input({ type: 'text', placeholder: tr(f.placeholder) }, s[f.id], (v) => { s[f.id] = v.trim(); onChange(false); });
   },

@@ -4,7 +4,7 @@
 //  Enter en un text: salta al camp següent. Espai/Enter en un botó: el marca.
 // Els grups es marquen amb [data-group]. Cap dependència de l'estructura de la plantilla.
 
-const CONTROLS = 'button:not([disabled]):not([hidden]), input:not([disabled])';
+const CONTROLS = 'button:not([disabled]):not([hidden]), input:not([disabled]), textarea';
 
 const controls = (root) => [...root.querySelectorAll(CONTROLS)];
 const groupOf = (el) => el.closest('[data-group]');
@@ -23,7 +23,7 @@ function focusStep(root, from, dir) {
   list[list.indexOf(from) + dir]?.focus();
 }
 
-const isText = (el) => el.tagName === 'INPUT' && el.type === 'text';
+const isText = (el) => (el.tagName === 'INPUT' && el.type === 'text') || el.tagName === 'TEXTAREA';
 
 export function attachKeyNav(root) {
   root.addEventListener('keydown', (e) => {
@@ -36,8 +36,9 @@ export function attachKeyNav(root) {
     switch (e.key) {
       case 'ArrowLeft': if (isTime || !atStart) return; focusStep(root, el, -1); break;
       case 'ArrowRight': if (isTime || !atEnd) return; focusStep(root, el, 1); break;
-      case 'ArrowUp': focusGroup(root, el, -1); break;
-      case 'ArrowDown': focusGroup(root, el, 1); break;
+      // En un text de diverses línies, ↑/↓ només surten des de la primera/última línia.
+      case 'ArrowUp': if (el.tagName === 'TEXTAREA' && el.value.lastIndexOf('\n', el.selectionStart - 1) !== -1) return; focusGroup(root, el, -1); break;
+      case 'ArrowDown': if (el.tagName === 'TEXTAREA' && el.value.indexOf('\n', el.selectionEnd) !== -1) return; focusGroup(root, el, 1); break;
       case 'Enter': if (el.tagName !== 'INPUT') return; focusGroup(root, el, 1); break;
       default: return;
     }

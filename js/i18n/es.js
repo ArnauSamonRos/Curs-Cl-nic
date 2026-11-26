@@ -9,7 +9,7 @@ export default {
   'units.infeccioses': 'HD Infecciosas',
   'units.polivalent-1': 'HD Polivalente 1',
   'units.polivalent-2': 'HD Polivalente 2',
-  'units.endocrino': 'HD Endocrinología',
+  'units.endocrino': 'HD Endocrino',
   'units.vacunacio': 'HD Vacunación',
   'units.geriatria': 'HD Geriatría',
   'units.uic': 'UIC',
@@ -23,6 +23,6 @@ export default {
   "editor.copyError": "Error al copiar",
   "editor.reset": "Nuevo paciente",
   "editor.resetConfirm": "¿Borrar todos los datos del formulario?",
-  "editor.kbd": "←→ mover · ↑↓ campo · Espacio marcar · Enter siguiente · Ctrl+Enter copiar · Alt+1/2/3 modo · Alt+N nuevo",
+  "editor.kbd": "←→ mover · ↑↓ campo · Espacio marcar · Enter siguiente · Ctrl+Enter copiar · Alt+1…4 pestaña · Alt+N nuevo",
   "form.search": "Buscar…",
 };

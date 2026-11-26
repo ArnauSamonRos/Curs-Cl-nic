@@ -79,3 +79,5 @@
 .pv-gap { height: 10px; }
 .pick { display: flex; flex-direction: column; gap: 8px; }
 .pick .chips { max-height: 220px; overflow: auto; padding: 2px; }
+.textarea { resize: vertical; line-height: 1.5; font-family: var(--font); }
+.subfields { display: contents; }
