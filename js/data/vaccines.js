@@ -5,7 +5,6 @@
 // Catàleg: nom curt al CC i marca per defecte.
 export const VACCINES = {
   pn21:   { name: 'Pneumo', brand: 'Pn 21' },
-  pn20:   { name: 'Pneumo', brand: 'Pn 20' },
   hexa:   { name: { ca: 'Hexavalent', es: 'Hexavalente' }, brand: 'Vaxelis' },
   hib:    { name: 'Haemophilus influenzae b', brand: 'Hiberix' },
   acwy:   { name: 'Mng ACWY', brand: 'Nimenrix' },
@@ -36,8 +35,8 @@ export const PROGRAMS = {
   derma: { label: { ca: 'Dermatologia', es: 'Dermatología' }, from: 'derma', schedule: BLUE, preset: BLUE_PRESET, note: BLUE_NOTE },
   vih: {
     label: { ca: 'CEX Infeccioses (VIH)', es: 'CEX Infecciosas (VIH)' }, from: 'cexinf',
-    schedule: { pn20: [0], vhz: [0, 2], acwy: [0, 2], vph: [0, 2, 6], vha: [0, 6], vhb: [0, 1, 2, 6] },
-    preset: ['pn20', 'vhz', 'acwy', 'vph', 'vha', 'vhb'],
+    schedule: { pn21: [0], vhz: [0, 2], acwy: [0, 2], vph: [0, 2, 6], vha: [0, 6], vhb: [0, 1, 2, 6] },
+    preset: ['pn21', 'vhz', 'acwy', 'vph', 'vha', 'vhb'],
     note: { ca: 'Papil·loma fins als 45 anys. VHA/VHB segons serologia.', es: 'Papiloma hasta los 45 años. VHA/VHB según serología.' },
   },
   onco: {

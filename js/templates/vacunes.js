@@ -8,7 +8,7 @@ const nm = (v) => (typeof v === 'object' ? v : { ca: v, es: v });
 const vName = (id, T) => { const n = nm(VACCINES[id].name); return T(n.ca, n.es); };
 const ord = (i, T) => T(`${i + 1}a dosi`, `${i + 1}ª dosis`);
 const months = (n, T) => (n === 1 ? T('1 mes', '1 mes') : T(`${n} mesos`, `${n} meses`));
-const isPneumo = (id) => id === 'pn20' || id === 'pn21';
+const isPneumo = (id) => id === 'pn21';
 
 const FROM = [
   o('hemato', 'Hematologia', 'Hematología'), o('reuma', 'Reumatologia', 'Reumatología'), o('digest', 'Digestiu', 'Digestivo'),
