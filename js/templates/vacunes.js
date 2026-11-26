@@ -131,9 +131,8 @@ const vacunes = {
     if (!shown.length) out.push(T('- Programa de vacunació completat.', '- Programa de vacunación completado.'));
     for (const g of shown) {
       const n = g.off - s.month;
-      const day = isFixed(s) ? T(` (dia ${visitMonths(s).indexOf(g.off) + 1})`, ` (día ${visitMonths(s).indexOf(g.off) + 1})`) : '';
-      out.push(T(`- Programo per a ${g.doses.map(lbl).join(' + ')} d'aquí a ${months(n, T)} (${addMonthsFmt(Date.now(), n)})${day}.`,
-        `- Programo para ${g.doses.map(lbl).join(' + ')} para dentro de ${months(n, T)} (${addMonthsFmt(Date.now(), n)})${day}.`));
+      out.push(T(`- Programo per a ${g.doses.map(lbl).join(' + ')} d'aquí a ${months(n, T)}.`,
+        `- Programo para ${g.doses.map(lbl).join(' + ')} para dentro de ${months(n, T)}.`));
     }
     return out.join('\n');
   },
