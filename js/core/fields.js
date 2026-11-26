@@ -8,7 +8,7 @@ import { nowHHMM } from './time.js';
 export function renderField(f, s, onChange) {
   const R = RENDERERS[f.type];
   if (!R) throw new Error('Tipus de camp desconegut: ' + f.type);
-  return h('div', { class: 'field' + (f.wide ? ' field-wide' : '') },
+  return h('div', { class: 'field' + (f.wide ? ' field-wide' : ''), 'data-group': f.id },
     f.label ? h('label', { class: 'field-label' }, tr(f.label)) : null,
     R(f, s, onChange));
 }
@@ -51,7 +51,7 @@ const RENDERERS = {
   },
 
   text(f, s, onChange) {
-    return input({ type: 'text', placeholder: tr(f.placeholder) }, s[f.id], (v) => { s[f.id] = v; onChange(false); });
+    return input({ type: 'text', placeholder: tr(f.placeholder) }, s[f.id], (v) => { s[f.id] = v.trim(); onChange(false); });
   },
 
   toggle(f, s, onChange) {

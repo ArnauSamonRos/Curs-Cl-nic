@@ -23,4 +23,5 @@ export default {
   "editor.copyError": "Error en copiar",
   "editor.reset": "Nou pacient",
   "editor.resetConfirm": "Esborrar totes les dades del formulari?",
+  "editor.kbd": "←→ moure · ↑↓ camp · Espai marcar · Enter següent · Ctrl+Enter copiar · Alt+1/2/3 mode · Alt+N nou",
 };
