@@ -55,7 +55,7 @@ const vacunes = {
   label: L('Vacunació', 'Vacunación'),
   init: () => {
     const s = { program: 'bio', month: 0, vaccines: [...PROGRAMS.bio.preset], given: [], age: '', from: null, fromOther: '', context: '',
-      explained: true, incid: 'no', incidText: '', carnet: true, fullPlan: false, footer: true, extra: '' };
+      explained: true, incid: 'no', incidText: '', carnet: true, fullPlan: false, extra: '' };
     recompute(s);
     return s;
   },
@@ -92,7 +92,6 @@ const vacunes = {
           : L('Programa completat: no queden dosis', 'Programa completado: no quedan dosis');
       } },
       { type: 'toggle', id: 'fullPlan', text: L('Mostrar tot el calendari pendent', 'Mostrar todo el calendario pendiente') },
-      { type: 'toggle', id: 'footer', text: L('“Assistència per immunització”', '“Asistencia por inmunización”') },
     ] },
   ],
   render(s, T) {
@@ -125,7 +124,6 @@ const vacunes = {
       out.push(T(`- Programo per a ${g.doses.map(lbl).join(' + ')} d'aquí a ${months(n, T)} (${addMonthsFmt(Date.now(), n)}).`,
         `- Programo para ${g.doses.map(lbl).join(' + ')} para dentro de ${months(n, T)} (${addMonthsFmt(Date.now(), n)}).`));
     }
-    if (s.footer) out.push('', T('Assistència per immunització', 'Asistencia por inmunización'));
     return out.join('\n');
   },
 };
